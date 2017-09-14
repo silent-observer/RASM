@@ -14,9 +14,11 @@
 #define deleteLList(LListName) deleteLList_ ## LListName
 #define llAppend(LListName) llAppend_ ## LListName
 #define llInsertBefore(LListName) llInsertBefore_ ## LListName
+#define llInsertAfter(LListName) llInsertAfter_ ## LListName
 #define llRemove(LListName) llRemove_ ## LListName
 #define llAppendL(LListName) llAppendL_ ## LListName
 #define llInsertBeforeL(LListName) llInsertBeforeL_ ## LListName
+#define llInsertAfterL(LListName) llInsertAfterL_ ## LListName
 #define llRemoveL(LListName) llRemoveL_ ## LListName
 #define llDuplicate(LListName) llDuplicate_ ## LListName
 
@@ -77,6 +79,13 @@ static void llInsertBefore(LListName)(                                          
     if (!newNode->prev)                                                         \
         list->start = newNode;                                                  \
 }                                                                               \
+static void llInsertAfter(LListName)(                                           \
+        LListName *list, LListNode(LListName) *element, type data) {            \
+    if (element->next)                                                          \
+        llInsertBefore(LListName)(list, element->next, data);                   \
+    else                                                                        \
+        llAppend(LListName)(list, data);                                        \
+}                                                                               \
                                                                                 \
 static void llRemove(LListName)(LListName *list,                                \
         LListNode(LListName) *element) {                                        \
@@ -112,6 +121,13 @@ static void llInsertBeforeL(LListName)(                                         
     }                                                                           \
     element->prev = data.end;                                                   \
     data.end->next = element;                                                   \
+}                                                                               \
+static void llInsertAfterL(LListName)(                                          \
+        LListName *list, LListNode(LListName) *element, LListName data) {       \
+    if (element->next)                                                          \
+        llInsertBeforeL(LListName)(list, element->next, data);                  \
+    else                                                                        \
+        llAppendL(LListName)(list, data);                                       \
 }                                                                               \
                                                                                 \
 static void llRemoveL(LListName)(LListName *list, LListName elements) {         \
