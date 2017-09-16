@@ -8,10 +8,8 @@ static const char *header = "DEPTH = " MEMORY_DEPTH ";\n"
                             "ADDRESS_RADIX = HEX;\n"
                             "DATA_RADIX = HEX;\n"
                             "CONTENT\n"
-                            "BEGIN\n"
-                            "00: ";
-static const char *end =    ";\n"
-                            "END;";
+                            "BEGIN\n";
+static const char *end =    "END;";
 
 unsigned short synthArg(bool isIType, Argument arg) {
     switch (arg.type) {
@@ -58,6 +56,8 @@ DString synthesize(InstructionList list) {
     char buffer[10];
     for (InstructionListNode *n = list.start; n; n = n->next) {
         Instruction instr = n->data;
+		sprintf(buffer, "%02x: ", instr.address);
+		daAppendN(DString)(&result, buffer, strlen(buffer));
         unsigned short val;
         bool synth[3] = {true, true, true};
         if (instr.isMacro && instr.mType == M_DW) {
@@ -78,6 +78,24 @@ DString synthesize(InstructionList list) {
                             case 't': sprintf(buffer, "%04x ", '\t'); break;
                             case 'v': sprintf(buffer, "%04x ", '\v'); break;
                             case '0': sprintf(buffer, "%04x ", '\0'); break;
+                            case 'x': {
+                                unsigned int value = 0;
+                                c++;
+                                while ((*c >= '0' && *c <= '9') ||
+                                       (*c >= 'a' && *c <= 'f') ||
+                                       (*c >= 'A' && *c <= 'F')) {
+                                    value *= 16;
+                                    if (*c >= '0' && *c <= '9')
+                                        value += *c++ - '0';
+                                    else if (*c >= 'a' && *c <= 'f')
+                                        value += *c++ - 'a' + 10;
+                                    else if (*c >= 'A' && *c <= 'F')
+                                        value += *c++ - 'A' + 10;
+                                }
+                                sprintf(buffer, "%04x ", value & 0xFF);
+                                c--;
+                                break;
+                            }
                             default: break;
                         }
                         daAppendN(DString)(&result, buffer, strlen(buffer));
@@ -132,14 +150,19 @@ DString synthesize(InstructionList list) {
         sprintf(buffer, "%04x ", val);
         daAppendN(DString)(&result, buffer, strlen(buffer));
         for (int i = 0; i < 3; i++) {
+			if (synth[i] && instr.args[i].type == A_ABSOLUTE) {
+                sprintf(buffer, "%04lx ", (instr.args[i].iVal & 0xFFFF0000) >> 16);
+                daAppendN(DString)(&result, buffer, strlen(buffer));
+            }
             if (synth[i] &&
                 (instr.args[i].type == A_CONSTANT ||
                  instr.args[i].type == A_ABSOLUTE ||
                  instr.args[i].type == A_STACK)) {
-                sprintf(buffer, "%04x ", (unsigned short)instr.args[i].iVal);
+                sprintf(buffer, "%04lx ", instr.args[i].iVal & 0xFFFF);
                 daAppendN(DString)(&result, buffer, strlen(buffer));
             }
         }
+		daAppendN(DString)(&result, ";\n", 2);
     }
     daAppendN(DString)(&result, end, strlen(end));
     daAppend(DString)(&result, "");

@@ -10,11 +10,11 @@ extern LabelTable labels;
 //extern YYSTYPE yylval;
 extern char *yytext;
 
-/*void printLabel(LabelTableEntry entry) {
+void printLabel(LabelTableEntry entry) {
     printf("%s = %04lx\n", entry->key, entry->value);
 }
 
-void printArgs(Argument *args) {
+void printArgs(Argument *args, bool isReplaced) {
     for (int i = 0; i < 3; i++) {
         Argument a = args[i];
         switch (a.type) {
@@ -27,7 +27,11 @@ void printArgs(Argument *args) {
                 } break;
             case A_CONSTANT: printf(" %ld", a.iVal); break;
             case A_ADDRESSED: printf(" *A"); break;
-            case A_ABSOLUTE: printf(" *%ld", a.iVal); break;
+            case A_ABSOLUTE:    if (!isReplaced) 
+                                    printf(" *%s", a.text);
+                                else 
+                                    printf(" *%04lxh", a.iVal); 
+                                break;
             case A_STACK: printf(" [%ld]", a.iVal); break;
             case A_ZERO: printf(" 0"); break;
             case A_STRING: printf(" \"%s\"", a.text); break;
@@ -36,7 +40,7 @@ void printArgs(Argument *args) {
     }
 }
 
-void printInstr(Instruction instr) {
+void printInstr(Instruction instr, bool isReplaced) {
     printf("%04x:", instr.address);
     if (instr.isMacro)
         switch (instr.mType) {
@@ -93,9 +97,9 @@ void printInstr(Instruction instr) {
             case I_SVPC: printf("SVPC"); break;
             case I_RET: printf("RET"); break;
         }
-    printArgs(instr.args);
+    printArgs(instr.args, isReplaced);
     printf("\n");
-}*/
+}
 
 int main(int argc, char *argv[]) {
 	if (argc != 3) {
@@ -110,15 +114,15 @@ int main(int argc, char *argv[]) {
     InstructionList list;
     if (yyparse(&list))
         exit(1);
-    //printf("    INSTRUCTIONS:\n");
-    //for (InstructionListNode *n = list.start; n; n = n->next)
-    //    printInstr(n->data);
-    //printf("    LABELS:\n");
-    //foreachRBT(LabelTable)(labels, &printLabel);
+    printf("    INSTRUCTIONS:\n");
+    for (InstructionListNode *n = list.start; n; n = n->next)
+        printInstr(n->data, false);
+    printf("    LABELS:\n");
+    foreachRBT(LabelTable)(labels, &printLabel);
     replaceLabelsAndMacros(&list, labels);
-    //printf("    REPLACED:\n");
-    //for (InstructionListNode *n = list.start; n; n = n->next)
-    //    printInstr(n->data);
+    printf("    REPLACED:\n");
+    for (InstructionListNode *n = list.start; n; n = n->next)
+        printInstr(n->data, true);
     DString str = synthesize(list);
     FILE *out = fopen(argv[2], "w");
     fprintf(out, "%s\n", str.data);

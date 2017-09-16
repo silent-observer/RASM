@@ -90,7 +90,7 @@
 # undef YYERROR_VERBOSE
 # define YYERROR_VERBOSE 1
 #else
-# define YYERROR_VERBOSE 1
+# define YYERROR_VERBOSE 0
 #endif
 
 /* In a future release of Bison, this section will be replaced
@@ -523,7 +523,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    60,    60,    62,    62,    69,    71,    73,    81,    83,
+       0,    60,    60,    62,    62,    69,    71,    74,    81,    83,
       86,    87,    89,    97,   104,   110,   117,   125,   132,   138,
      144,   150,   151,   153,   160,   166,   174,   175,   181,   191,
      192,   193,   194,   195,   196,   197,   198,   199,   200,   201,
@@ -536,7 +536,7 @@ static const yytype_uint16 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 1
+#if YYDEBUG || YYERROR_VERBOSE || 0
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
@@ -2142,7 +2142,7 @@ yyreduce:
 
   case 96:
 #line 279 "parser.y" /* yacc.c:1646  */
-    {a.text = (yyvsp[0].text); nextAddress++; (yyval.arg) = a;}
+    {a.text = (yyvsp[0].text); nextAddress += 2; (yyval.arg) = a;}
 #line 2147 "source/parser.tab.c" /* yacc.c:1646  */
     break;
 

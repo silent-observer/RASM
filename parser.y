@@ -12,7 +12,7 @@
 %}
 
 %parse-param {InstructionList *result}
-%define parse.error verbose
+//%define parse.error verbose
 %locations
 
 %union {
@@ -70,7 +70,7 @@ instructionList : instructionList {memset(&i, 0, sizeof i);} instruction
                     {$$ = $1;}
                 | instructionList '\n'
                     {$$ = $1;}
-                | %empty
+                |
                     {
                         labels = newRBT(LabelTable)(&cmpStr,
                             &dstrLabelTableEntry);
@@ -276,7 +276,7 @@ imm : HEX {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
 	| IDENTIFIER {a.type = A_IDENTIFIER; a.text = $1; nextAddress++; $$ = a;}
     ;
 
-absolute    : '*' IDENTIFIER {a.text = $2; nextAddress++; $$ = a;}
+absolute    : '*' IDENTIFIER {a.text = $2; nextAddress += 2; $$ = a;}
 addressed   : '*' A {a.rType = REG_A; $$ = a;}
 stack       : '[' embedded_imm ']' {a.iVal = $2.iVal; nextAddress++; $$ = a;}
 
