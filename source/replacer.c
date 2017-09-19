@@ -2,8 +2,6 @@
 #include "error.h"
 
 static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels) {
-    if (arg.type == A_IDENTIFIER)
-        arg.type = A_CONSTANT;
     LabelTableEntry entry = rbtGet(LabelTable)(labels, arg.text);
     test(!entry, "Unknown identifier %s!\n", arg.text);
     free(arg.text);
@@ -11,6 +9,14 @@ static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels)
         arg.iVal = entry->value - (instr.address+1);
     else
         arg.iVal = entry->value;
+    if (arg.type == A_ID_HIGH)
+        arg.iVal = (arg.iVal & 0xFFFF0000) >> 16;
+    else if (arg.type == A_ID_LOW)
+        arg.iVal &= 0xFFFF;
+    if (arg.type == A_IDENTIFIER || 
+        arg.type == A_ID_HIGH || 
+        arg.type == A_ID_LOW)
+        arg.type = A_CONSTANT;
     return arg;
 }
 
@@ -66,6 +72,8 @@ void replaceLabelsAndMacros(InstructionList *list, LabelTable labels) {
             replaceMacro(list, n);
         for (int i = 0; i < 3; i++)
             if (n->data.args[i].type == A_IDENTIFIER ||
+                n->data.args[i].type == A_ID_HIGH ||
+                n->data.args[i].type == A_ID_LOW ||
                 n->data.args[i].type == A_ABSOLUTE)
                 n->data.args[i] = replaceLabel(n->data, n->data.args[i], labels);
     }

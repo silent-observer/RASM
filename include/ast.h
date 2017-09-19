@@ -33,7 +33,9 @@ enum argType {
     A_STACK,
     A_ZERO,
     A_STRING,
-    A_IDENTIFIER
+    A_IDENTIFIER,
+    A_ID_HIGH,
+    A_ID_LOW
 };
 enum registerType {
     REG_SP,

@@ -42,6 +42,7 @@
 %token CALL HALT DW
 
 %token A B C SP
+%token HIGH LOW
 
 %token <text> IDENTIFIER STRING
 %token <iVal> HEX BINARY DECIMAL CHAR
@@ -267,6 +268,8 @@ embedded_imm    : HEX {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
                 | CHAR {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
                 | '0' {a.type = A_CONSTANT; a.iVal = 0; $$ = a;}
 				| IDENTIFIER {a.type = A_IDENTIFIER; a.text = $1; $$ = a;}
+                | IDENTIFIER HIGH {a.type = A_ID_HIGH; a.text = $1; $$ = a;}
+                | IDENTIFIER LOW {a.type = A_ID_LOW; a.text = $1; $$ = a;}
                 ;
 imm : HEX {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
     | BINARY {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
@@ -274,6 +277,8 @@ imm : HEX {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
     | CHAR {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
     | '0' {a.type = A_ZERO; a.iVal = 0; $$ = a;}
 	| IDENTIFIER {a.type = A_IDENTIFIER; a.text = $1; nextAddress++; $$ = a;}
+    | IDENTIFIER HIGH {a.type = A_ID_HIGH; a.text = $1; nextAddress++; $$ = a;}
+    | IDENTIFIER LOW {a.type = A_ID_LOW; a.text = $1; nextAddress++; $$ = a;}
     ;
 
 absolute    : '*' IDENTIFIER {a.text = $2; nextAddress += 2; $$ = a;}

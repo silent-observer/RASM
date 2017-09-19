@@ -107,8 +107,8 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
     yyin = fopen(argv[1], "r");
-    //yydebug = 1;
-    /*for (int i = yylex(); i; i = yylex()) {
+    /*yydebug = 1;
+    for (int i = yylex(); i; i = yylex()) {
         printf("(%d, %s)\n", i, yytext);
     }*/
     InstructionList list;

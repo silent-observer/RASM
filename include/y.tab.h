@@ -98,12 +98,14 @@ extern int yydebug;
     B = 308,
     C = 309,
     SP = 310,
-    IDENTIFIER = 311,
-    STRING = 312,
-    HEX = 313,
-    BINARY = 314,
-    DECIMAL = 315,
-    CHAR = 316
+    HIGH = 311,
+    LOW = 312,
+    IDENTIFIER = 313,
+    STRING = 314,
+    HEX = 315,
+    BINARY = 316,
+    DECIMAL = 317,
+    CHAR = 318
   };
 #endif
 
@@ -122,7 +124,7 @@ union YYSTYPE
     char *text;
     long int iVal;
 
-#line 126 "include/y.tab.h" /* yacc.c:1909  */
+#line 128 "include/y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

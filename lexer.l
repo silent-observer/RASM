@@ -96,6 +96,11 @@ A|a   { count(); return A;}
 B|b   { count(); return B;}
 C|c   { count(); return C;}
 SP|sp { count(); return SP;}
+%{
+    // High and low bytes
+%}
+".h"|".H" { count(); return HIGH;}
+".l"|".L" { count(); return LOW;}
 
 \"(\\.|[^\\"])*\" { count(); yylval.text = strdup(yytext); return STRING;}
 '(\\.|.)' { count(); yylval.iVal = parseEscapeSeq(yytext); return CHAR;}
