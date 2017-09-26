@@ -109,9 +109,17 @@ simple_instr    : a_type reg_mem_imm ',' reg ',' dest
                         i.args[0] = $2;
                         $$ = i;
                     }
-                | i_type dest_sp ',' embedded_imm
+                | i_type dest_sp ',' embedded_imm ',' dest_sp
                     {
                         i.iType = $1;
+                        i.args[0] = $2;
+                        i.args[1] = $4;
+                        i.args[2] = $6;
+                        $$ = i;
+                    }
+                | LDI embedded_imm ',' dest_sp
+                    {
+                        i.iType = I_LDI;
                         i.args[0] = $2;
                         i.args[1] = $4;
                         $$ = i;
@@ -214,7 +222,6 @@ i_type  : ADDI {$$ = I_ADDI;}
         | ANDI {$$ = I_ANDI;}
         | ORI  {$$ = I_ORI;}
         | XORI {$$ = I_XORI;}
-        | LDI  {$$ = I_LDI;}
         ;
 
 si_type : LSHI {$$ = I_LSHI;}
