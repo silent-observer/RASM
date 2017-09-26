@@ -8,6 +8,7 @@
     static Argument a;
     int yylex();
     void yyerror(InstructionList *result, const char *s);
+    int calcLength (char *str);
     int yylineno;
 %}
 
@@ -68,7 +69,7 @@ instructionList : instructionList {memset(&i, 0, sizeof i);} instruction
                         $$ = $1;
                     }
                 | instructionList label
-                    {$$ = $1;}
+                    {nextAddress = currAddress; $$ = $1;}
                 | instructionList '\n'
                     {$$ = $1;}
                 |
@@ -184,7 +185,7 @@ macro_instr : MOV reg_mem_imm ',' dest
                     i.mType = M_DW;
                     i.args[0].type = A_STRING;
                     i.args[0].text = $2;
-                    nextAddress += strlen($2)-1;
+                    nextAddress += calcLength($2)-2;
                     $$ = i;
                 }
             ;
@@ -291,4 +292,25 @@ stack       : '[' embedded_imm ']' {a.iVal = $2.iVal; nextAddress++; $$ = a;}
 void yyerror (InstructionList *result, char const *s)
 {
   fprintf (stderr, "%d:%s\n", yylineno, s);
+}
+
+int calcLength (char *str) {
+    int len = 0;
+    for (char *c = str; *c;) {
+        if (*c == '\\') {
+            c++;
+            if (*c++ != 'x')
+                len++;
+            else {
+                while ((*c >= '0' && *c <= '9') ||
+                        (*c >= 'A' && *c <= 'F') ||
+                        (*c >= 'a' && *c <= 'f'))
+                    c++;
+                len++;
+            }
+        } else { 
+            len++; c++;
+        }
+    }
+    return len;
 }

@@ -59,7 +59,7 @@ typedef struct {
 } Argument;
 
 typedef struct {
-    unsigned int address;
+    unsigned long int address;
     bool isMacro;
     union {
         enum instrType iType;

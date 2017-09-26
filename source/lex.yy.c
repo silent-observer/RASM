@@ -1255,17 +1255,17 @@ YY_RULE_SETUP
 case 60:
 YY_RULE_SETUP
 #line 107 "lexer.l"
-{ count(); yylval.iVal = strtol(yytext, NULL, 16) & 0xFFFF; return HEX;}
+{ count(); yylval.iVal = strtol(yytext, NULL, 16) & 0xFFFFFFFF; return HEX;}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
 #line 108 "lexer.l"
-{ count(); yylval.iVal = strtol(yytext, NULL, 2) & 0xFFFF; return BINARY;}
+{ count(); yylval.iVal = strtol(yytext, NULL, 2) & 0xFFFFFFFF; return BINARY;}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
 #line 109 "lexer.l"
-{ count(); yylval.iVal = strtol(yytext, NULL, 10) & 0xFFFF; return DECIMAL;}
+{ count(); yylval.iVal = strtol(yytext, NULL, 10) & 0xFFFFFFFF; return DECIMAL;}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP

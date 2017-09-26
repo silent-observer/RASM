@@ -30,11 +30,11 @@ void printArgs(Argument *args, bool isReplaced) {
             case A_ABSOLUTE:    if (!isReplaced) 
                                     printf(" *%s", a.text);
                                 else 
-                                    printf(" *%04lxh", a.iVal); 
+                                    printf(" *%08lxh", a.iVal); 
                                 break;
             case A_STACK: printf(" [%ld]", a.iVal); break;
             case A_ZERO: printf(" 0"); break;
-            case A_STRING: printf(" \"%s\"", a.text); break;
+            case A_STRING: printf(" %s", a.text); break;
             case A_IDENTIFIER: printf(" %s", a.text); break;
         }
     }
@@ -107,8 +107,8 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
     yyin = fopen(argv[1], "r");
-    /*yydebug = 1;
-    for (int i = yylex(); i; i = yylex()) {
+    //yydebug = 1;
+    /*for (int i = yylex(); i; i = yylex()) {
         printf("(%d, %s)\n", i, yytext);
     }*/
     InstructionList list;

@@ -1,7 +1,7 @@
 #include "synthesizer.h"
 
 #define DEFAULT_SIZE 500
-#define MEMORY_DEPTH "256"
+#define MEMORY_DEPTH "1024"
 
 static const char *header = "DEPTH = " MEMORY_DEPTH ";\n"
                             "WIDTH = 16;\n"
@@ -56,7 +56,7 @@ DString synthesize(InstructionList list) {
     char buffer[10];
     for (InstructionListNode *n = list.start; n; n = n->next) {
         Instruction instr = n->data;
-		sprintf(buffer, "%02x: ", instr.address);
+		sprintf(buffer, "%03x: ", instr.address);
 		daAppendN(DString)(&result, buffer, strlen(buffer));
         unsigned short val;
         bool synth[3] = {true, true, true};

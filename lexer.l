@@ -104,9 +104,9 @@ SP|sp { count(); return SP;}
 
 \"(\\.|[^\\"])*\" { count(); yylval.text = strdup(yytext); return STRING;}
 '(\\.|.)' { count(); yylval.iVal = parseEscapeSeq(yytext); return CHAR;}
-[+-]?0*[1-9A-Fa-f][0-9a-fA-F]*h { count(); yylval.iVal = strtol(yytext, NULL, 16) & 0xFFFF; return HEX;}
-[+-]?0*[0-1]+b { count(); yylval.iVal = strtol(yytext, NULL, 2) & 0xFFFF; return BINARY;}
-[+-]?[1-9][0-9]* { count(); yylval.iVal = strtol(yytext, NULL, 10) & 0xFFFF; return DECIMAL;}
+[+-]?0*[1-9A-Fa-f][0-9a-fA-F]*h { count(); yylval.iVal = strtol(yytext, NULL, 16) & 0xFFFFFFFF; return HEX;}
+[+-]?0*[0-1]+b { count(); yylval.iVal = strtol(yytext, NULL, 2) & 0xFFFFFFFF; return BINARY;}
+[+-]?[1-9][0-9]* { count(); yylval.iVal = strtol(yytext, NULL, 10) & 0xFFFFFFFF; return DECIMAL;}
 [a-zA-Z_][a-zA-Z0-9_]* { count(); yylval.text = strdup(yytext); return IDENTIFIER;}
 [\[\]*,:=\n0] { count(); return yytext[0];}
 
