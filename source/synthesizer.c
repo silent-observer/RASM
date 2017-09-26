@@ -27,6 +27,8 @@ unsigned short synthArg(bool isIType, Argument arg) {
         case A_STACK: return 7;
         case A_STRING: printf("Cannot use strings as arguments in not DW instruction!\n");
                        exit(1);
+        case A_ID_HIGH:
+        case A_ID_LOW:
         case A_IDENTIFIER: printf("Very Strange Error. How identifier even got here?..\n");
                            exit(2);
     }
@@ -56,7 +58,7 @@ DString synthesize(InstructionList list) {
     char buffer[10];
     for (InstructionListNode *n = list.start; n; n = n->next) {
         Instruction instr = n->data;
-		sprintf(buffer, "%03x: ", instr.address);
+		sprintf(buffer, "%03lx: ", instr.address);
 		daAppendN(DString)(&result, buffer, strlen(buffer));
         unsigned short val;
         bool synth[3] = {true, true, true};
