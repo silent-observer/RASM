@@ -1,9 +1,6 @@
 %{
     #include "ast.h"
     #include "cmpAndDstrFuncs.h"
-    LabelTable labels;
-    static unsigned long int currAddress = 0;
-    static unsigned long int nextAddress = 0;
     static Instruction i;
     static Argument a;
     int yylex();
@@ -49,7 +46,7 @@
 %token <iVal> HEX BINARY DECIMAL CHAR
 
 %type <iList> instructionList
-%type <instr> instruction simple_instr macro_instr
+%type <instr> instruction simple_instr macro_instr label
 %type <iType> a_type i_type si_type jfg_type flg_type
 %type <mType> jfg_macro
 %type <arg> reg_mem_imm dest dest_sp reg mem imm embedded_imm reg_sp
@@ -63,27 +60,38 @@ program : instructionList {*result = $1;}
 
 instructionList : instructionList {memset(&i, 0, sizeof i);} instruction
                     {
-                        $3.address = currAddress;
-                        currAddress = ++nextAddress;
                         llAppend(InstructionList)(&$1, $3);
                         $$ = $1;
                     }
-                | instructionList label
-                    {nextAddress = currAddress; $$ = $1;}
+                | instructionList {memset(&i, 0, sizeof i);} label
+                    {
+                        $3.isMacro = true; 
+                        llAppend(InstructionList)(&$1, $3);
+                        $$ = $1;
+                    }
                 | instructionList '\n'
                     {$$ = $1;}
                 |
                     {
-                        labels = newRBT(LabelTable)(&cmpStr,
-                            &dstrLabelTableEntry);
                         $$ = newLList(InstructionList)(&dstrInstr);
                     }
                 ;
 
-label   : IDENTIFIER ':'        '\n'
-            {rbtSet(LabelTable)(&labels, $1, currAddress); }
-        | IDENTIFIER '=' imm    '\n'
-            {rbtSet(LabelTable)(&labels, $1, $3.iVal); }
+label   : IDENTIFIER ':' '\n'
+            {
+                i.mType = M_LABEL; 
+                i.args[0].type = A_IDENTIFIER; 
+                i.args[0].text = $1;
+                $$ = i;
+            }
+        | IDENTIFIER '=' imm '\n'
+            {
+                i.mType = M_LABEL_ASSIGN; 
+                i.args[0].type = A_IDENTIFIER; 
+                i.args[0].text = $1;
+                i.args[1] = $3;
+                $$ = i;
+            }
         ;
 instruction : simple_instr '\n' {$1.isMacro = false; $$ = $1;}
             | macro_instr  '\n' {$1.isMacro = true; $$ = $1;}
@@ -178,7 +186,6 @@ macro_instr : MOV reg_mem_imm ',' dest
                     i.mType = M_CALL;
                     i.args[0].type = A_IDENTIFIER;
                     i.args[0].text = $2;
-                    nextAddress++;
                     $$ = i;
                 }
             | HALT   {i.mType = M_HALT; $$ = i;}
@@ -193,7 +200,6 @@ macro_instr : MOV reg_mem_imm ',' dest
                     i.mType = M_DW;
                     i.args[0].type = A_STRING;
                     i.args[0].text = $2;
-                    nextAddress += calcLength($2)-2;
                     $$ = i;
                 }
             ;
@@ -279,19 +285,19 @@ embedded_imm    : HEX {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
                 | IDENTIFIER HIGH {a.type = A_ID_HIGH; a.text = $1; $$ = a;}
                 | IDENTIFIER LOW {a.type = A_ID_LOW; a.text = $1; $$ = a;}
                 ;
-imm : HEX {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
-    | BINARY {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
-    | DECIMAL {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
-    | CHAR {a.type = A_CONSTANT; a.iVal = $1; nextAddress++; $$ = a;}
+imm : HEX {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
+    | BINARY {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
+    | DECIMAL {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
+    | CHAR {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
     | '0' {a.type = A_ZERO; a.iVal = 0; $$ = a;}
-	| IDENTIFIER {a.type = A_IDENTIFIER; a.text = $1; nextAddress++; $$ = a;}
-    | IDENTIFIER HIGH {a.type = A_ID_HIGH; a.text = $1; nextAddress++; $$ = a;}
-    | IDENTIFIER LOW {a.type = A_ID_LOW; a.text = $1; nextAddress++; $$ = a;}
+	| IDENTIFIER {a.type = A_IDENTIFIER; a.text = $1; $$ = a;}
+    | IDENTIFIER HIGH {a.type = A_ID_HIGH; a.text = $1; $$ = a;}
+    | IDENTIFIER LOW {a.type = A_ID_LOW; a.text = $1; $$ = a;}
     ;
 
-absolute    : '*' IDENTIFIER {a.text = $2; nextAddress += 2; $$ = a;}
+absolute    : '*' IDENTIFIER {a.text = $2; $$ = a;}
 addressed   : '*' A {a.rType = REG_A; $$ = a;}
-stack       : '[' embedded_imm ']' {a.iVal = $2.iVal; nextAddress++; $$ = a;}
+stack       : '[' embedded_imm ']' {a.iVal = $2.iVal; $$ = a;}
 
 %%
 
@@ -299,25 +305,4 @@ stack       : '[' embedded_imm ']' {a.iVal = $2.iVal; nextAddress++; $$ = a;}
 void yyerror (InstructionList *result, char const *s)
 {
   fprintf (stderr, "%d:%s\n", yylineno, s);
-}
-
-int calcLength (char *str) {
-    int len = 0;
-    for (char *c = str; *c;) {
-        if (*c == '\\') {
-            c++;
-            if (*c++ != 'x')
-                len++;
-            else {
-                while ((*c >= '0' && *c <= '9') ||
-                        (*c >= 'A' && *c <= 'F') ||
-                        (*c >= 'a' && *c <= 'f'))
-                    c++;
-                len++;
-            }
-        } else { 
-            len++; c++;
-        }
-    }
-    return len;
 }

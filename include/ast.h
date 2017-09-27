@@ -46,7 +46,8 @@ enum macroType {
     M_MOV,
     M_JVC, M_JVS, M_JNE, M_JEQ,
     M_JGE, M_JLT, M_JCC, M_JCS,
-    M_CALL, M_HALT, M_DW
+    M_CALL, M_HALT, M_DW,
+    M_LABEL, M_LABEL_ASSIGN
 };
 
 typedef struct {

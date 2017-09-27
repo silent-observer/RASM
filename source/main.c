@@ -3,6 +3,7 @@
 #include "y.tab.h"
 #include "replacer.h"
 #include "synthesizer.h"
+#include "addresser.h"
 
 extern FILE* yyin;
 extern int yylex();
@@ -11,7 +12,7 @@ extern LabelTable labels;
 extern char *yytext;
 
 void printLabel(LabelTableEntry entry) {
-    printf("%s = %04lx\n", entry->key, entry->value);
+    printf("%s = %04lX\n", entry->key, entry->value);
 }
 
 void printArgs(Argument *args, bool isReplaced) {
@@ -25,23 +26,25 @@ void printArgs(Argument *args, bool isReplaced) {
                     case REG_C: printf(" C"); break;
                     case REG_SP: printf(" SP"); break;
                 } break;
-            case A_CONSTANT: printf(" %ld", a.iVal); break;
+            case A_CONSTANT: printf(a.iVal < 1000? " %ld" : " %08lXh", a.iVal); break;
             case A_ADDRESSED: printf(" *A"); break;
             case A_ABSOLUTE:    if (!isReplaced) 
                                     printf(" *%s", a.text);
                                 else 
-                                    printf(" *%08lxh", a.iVal); 
+                                    printf(" *%08lXh", a.iVal); 
                                 break;
             case A_STACK: printf(" [%ld]", a.iVal); break;
             case A_ZERO: printf(" 0"); break;
             case A_STRING: printf(" %s", a.text); break;
             case A_IDENTIFIER: printf(" %s", a.text); break;
+            case A_ID_HIGH: printf(" %s.h", a.text); break;
+            case A_ID_LOW: printf(" %s.l", a.text); break;
         }
     }
 }
 
 void printInstr(Instruction instr, bool isReplaced) {
-    printf("%04x:", instr.address);
+    printf("%04lX:", instr.address);
     if (instr.isMacro)
         switch (instr.mType) {
             case M_MOV: printf("MOV"); break;
@@ -56,6 +59,8 @@ void printInstr(Instruction instr, bool isReplaced) {
             case M_CALL: printf("CALL"); break;
             case M_HALT: printf("HALT"); break;
             case M_DW: printf("DW"); break;
+            case M_LABEL: printf("LABEL"); break;
+            case M_LABEL_ASSIGN: printf("LABEL ="); break;
         }
     else
         switch (instr.iType) {
@@ -102,10 +107,10 @@ void printInstr(Instruction instr, bool isReplaced) {
 }
 
 int main(int argc, char *argv[]) {
-	if (argc != 3) {
-		printf("Usage: rasm <input.rcpu> <output.mif>\n");
-		exit(1);
-	}
+    if (argc != 3) {
+        printf("Usage: rasm <input.rcpu> <output.mif>\n");
+        exit(1);
+    }
     yyin = fopen(argv[1], "r");
     //yydebug = 1;
     /*for (int i = yylex(); i; i = yylex()) {
@@ -114,15 +119,22 @@ int main(int argc, char *argv[]) {
     InstructionList list;
     if (yyparse(&list))
         exit(1);
+
     printf("    INSTRUCTIONS:\n");
     for (InstructionListNode *n = list.start; n; n = n->next)
         printInstr(n->data, false);
+
+    LabelTable labels = addAddresses(&list);
+
     printf("    LABELS:\n");
     foreachRBT(LabelTable)(labels, &printLabel);
+
     replaceLabelsAndMacros(&list, labels);
+
     printf("    REPLACED:\n");
     for (InstructionListNode *n = list.start; n; n = n->next)
         printInstr(n->data, true);
+    
     DString str = synthesize(list);
     FILE *out = fopen(argv[2], "w");
     fprintf(out, "%s\n", str.data);
