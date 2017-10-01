@@ -88,5 +88,28 @@ typedef struct {
     defineLList(InstructionList, Instruction)
 #endif
 
+enum paramType {
+    P_REG,
+    P_REG_MEM,
+    P_REG_MEM_IMM,
+    P_IMM
+};
+
+#ifndef PARAM_TYPE_DARRAY
+    #define PARAM_TYPE_DARRAY
+    typedef enum paramType paramType;
+    defineDArray(ParamTypeDArray, paramType)
+#endif
+
+typedef struct {
+    ParamTypeDArray paramTypes;
+    InstructionList instrs;
+} UserMacro;
+
+#ifndef USERMACRO_TABLE
+    #define USERMACRO_TABLE
+    typedef char *charptr;
+    defineRBT(UserMacroTable, charptr, UserMacro)
+#endif
 
 #endif

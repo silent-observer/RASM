@@ -14,10 +14,10 @@ static unsigned int getArgSize(Argument arg) {
         case A_IDENTIFIER: printf("Cannot use identifier '%s' as argument, use '%s.h' or '%s.l' instead.\n", 
             arg.text, arg.text, arg.text); exit(1);
         case A_STRING: printf("Cannot use string %s in not DW instruction.\n", arg.text); exit(1);
-        case A_MACRO_ARG: printf("Macro definition is not supported yet.\n"); exit(3);
+        case A_MACRO_ARG: printf("Cannot use macro parameters outside of macro definition!.\n"); exit(1);
     }
     printf("I don't understand how control can reach here.\nNevermind.\n"); 
-    exit(1);
+    exit(2);
 }
 
 static unsigned int getInstrSize(Instruction instr) {
@@ -97,7 +97,7 @@ static unsigned int getInstrSize(Instruction instr) {
             case M_LABEL: case M_LABEL_ASSIGN:
                 size = 0;
                 break;
-            case M_USER_MACRO: case M_INCLUDE: printf("Macro definition is not supported yet.\n"); exit(2);
+            case M_USER_MACRO: case M_INCLUDE: printf("Strange error which involves unresolved user macros.\n"); exit(2);
         }
     return size;
 }

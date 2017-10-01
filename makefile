@@ -11,7 +11,8 @@ OBJFILES = 	objfiles/addresser.o \
 			objfiles/main.o \
 			objfiles/parser.tab.o \
 			objfiles/replacer.o \
-			objfiles/synthesizer.o
+			objfiles/synthesizer.o \
+			objfiles/userMacroReplacer.o
 
 
 rasm.exe: $(OBJFILES)
@@ -22,7 +23,7 @@ objfiles/%.o: source/%.c include/ast.h $(DATA_STR_INCLUDE)
 
 objfiles/addresser.o  objfiles/parser.tab.o: include/cmpAndDstrFuncs.h
 objfiles/lex.yy.o objfiles/main.o: include/y.tab.h
-objfiles/replacer.o: include/error.h
+objfiles/replacer.o objfiles/userMacroReplacer.o: include/error.h
 objfiles/synthesizer.o objfiles/main.o: include/synthesizer.h
 objfiles/main.o: include/addresser.h include/replacer.h
 

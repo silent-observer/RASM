@@ -7,5 +7,6 @@
 int cmpStr(char *a, char *b);
 void dstrLabelTableEntry(LabelTableEntry entry);
 void dstrInstr(InstructionListNode *n);
+void dstrUserMacroTableEntry(UserMacroTableEntry entry);
 
 #endif

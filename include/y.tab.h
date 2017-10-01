@@ -117,20 +117,22 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 16 "parser.y"
+#line 19 "parser.y"
 
     InstructionList iList;
     Instruction instr;
     Argument arg;
+    ParamTypeDArray paramTypes;
     enum instrType iType;
     enum macroType mType;
+    enum paramType pType;
     char *text;
     long int iVal;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 134 "include/y.tab.h"
+#line 136 "include/y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -4,10 +4,12 @@
 #include "replacer.h"
 #include "synthesizer.h"
 #include "addresser.h"
+#include "cmpAndDstrFuncs.h"
+#include "userMacroReplacer.h"
 
 extern FILE* yyin;
 extern int yylex();
-extern int yyparse(InstructionList *list);
+extern int yyparse(InstructionList *list, UserMacroTable *userMacros);
 extern LabelTable labels;
 //extern YYSTYPE yylval;
 extern char *yytext;
@@ -39,7 +41,7 @@ void printArgs(ArgumentDArray args, bool isReplaced) {
             case A_IDENTIFIER: printf(" %s", a.text); break;
             case A_ID_HIGH: printf(" %s.h", a.text); break;
             case A_ID_LOW: printf(" %s.l", a.text); break;
-            case A_MACRO_ARG: printf("$%ld", a.iVal); break;
+            case A_MACRO_ARG: printf(" $%ld", a.iVal); break;
         }
     }
 }
@@ -109,6 +111,24 @@ void printInstr(Instruction instr, bool isReplaced) {
     printf("\n");
 }
 
+void printUserMacroTableEntry(UserMacroTableEntry entry) {
+    printf("%s [", entry->key);
+    for(int i = 0; i < entry->value.paramTypes.size; i++) {
+        switch(entry->value.paramTypes.data[i]) {
+            case P_REG: printf("REG"); break;
+            case P_REG_MEM: printf("REGMEM"); break;
+            case P_REG_MEM_IMM: printf("REGMEMIMM"); break;
+            case P_IMM: printf("IMM"); break;
+        }
+        if (i != entry->value.paramTypes.size-1)
+            printf(", ");
+    }
+    printf("] {\n");
+    for (InstructionListNode *n = entry->value.instrs.start; n; n = n->next)
+        printInstr(n->data, false);
+    printf("}\n");
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         printf("Usage: rasm <input.rcpu> <output.mif>\n");
@@ -120,10 +140,20 @@ int main(int argc, char *argv[]) {
         printf("(%d, %s)\n", i, yytext);
     }*/
     InstructionList list;
-    if (yyparse(&list))
+    UserMacroTable userMacros = newRBT(UserMacroTable)(&cmpStr, &dstrUserMacroTableEntry);
+    if (yyparse(&list, &userMacros))
         exit(1);
 
+    printf("    USER MACROS:\n");
+    foreachRBT(UserMacroTable)(userMacros, &printUserMacroTableEntry);
+
     printf("    INSTRUCTIONS:\n");
+    for (InstructionListNode *n = list.start; n; n = n->next)
+        printInstr(n->data, false);
+
+    replaceUserMacros(&list, userMacros);
+
+    printf("    REPLACED USER MACROS:\n");
     for (InstructionListNode *n = list.start; n; n = n->next)
         printInstr(n->data, false);
 
@@ -138,7 +168,7 @@ int main(int argc, char *argv[]) {
 
     replaceLabelsAndMacros(&list, labels);
 
-    printf("    REPLACED:\n");
+    printf("    REPLACED MACROS AND LABELS:\n");
     for (InstructionListNode *n = list.start; n; n = n->next)
         printInstr(n->data, true);
     

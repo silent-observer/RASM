@@ -18,3 +18,9 @@ void dstrInstr(InstructionListNode *n) {
     free(n);
     free(n->data.args.data);
 }
+void dstrUserMacroTableEntry(UserMacroTableEntry entry) {
+    free(entry->key);
+    free(entry->value.paramTypes.data);
+    deleteLList(InstructionList)(entry->value.instrs);
+    free(entry);
+}

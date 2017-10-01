@@ -27,7 +27,7 @@ unsigned short synthArg(bool isIType, Argument arg) {
         case A_STACK: return 7;
         case A_STRING: printf("Cannot use strings as arguments in not DW instruction!\n");
                        exit(1);
-        case A_MACRO_ARG: printf("Macro definition is not supported yet.\n"); exit(3);
+        case A_MACRO_ARG: printf("Strange error, addresser didn't catch macro parameter.\n"); exit(2);
         case A_ID_HIGH:
         case A_ID_LOW:
         case A_IDENTIFIER: printf("Very Strange Error. How identifier even got here?..\n");

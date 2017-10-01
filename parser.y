@@ -3,22 +3,27 @@
     #include "cmpAndDstrFuncs.h"
     static Instruction i;
     static Argument a;
+    static bool isInUserMacroDef;
+    static UserMacro currUserMacro;
     int yylex();
-    void yyerror(InstructionList *result, const char *s);
+    void yyerror(InstructionList *result, UserMacroTable *userMacros, const char *s);
     int calcLength (char *str);
     int yylineno;
 %}
 
 %parse-param {InstructionList *result}
-//%define parse.error verbose
+%parse-param {UserMacroTable *userMacros}
+%error-verbose
 %locations
 
 %union {
     InstructionList iList;
     Instruction instr;
     Argument arg;
+    ParamTypeDArray paramTypes;
     enum instrType iType;
     enum macroType mType;
+    enum paramType pType;
     char *text;
     long int iVal;
 }
@@ -60,6 +65,9 @@
 %type <arg> reg_mem_imm reg_mem_imm_without_macro_arg
 %type <arg> absolute addressed stack
 
+%type <paramTypes> parameter_list
+%type <pType> param_type
+
 %start program
 
 %%
@@ -85,6 +93,7 @@ instruction_list : instruction_list {memset(&i, 0, sizeof i);} instruction
                 |
                     {
                         $$ = newLList(InstructionList)(&dstrInstr);
+                        isInUserMacroDef = false;
                     }
                 ;
 
@@ -109,21 +118,31 @@ label   : IDENTIFIER ':' '\n'
             }
         ;
 
-macro_definition : '#' DEFMACRO IDENTIFIER '[' parameter_list ']' '\n' instruction_list ENDDEF '\n'
+macro_definition : '#' DEFMACRO IDENTIFIER '[' parameter_list ']' '\n' 
+                    {
+                        isInUserMacroDef = true;
+                        currUserMacro.paramTypes = $5;
+                    } 
+                    instruction_list ENDDEF '\n'
+                    {
+                        isInUserMacroDef = false;
+                        currUserMacro.instrs = $9;
+                        rbtSet(UserMacroTable)(userMacros, $3, currUserMacro);
+                    } 
                  ;
 
 include_directive : '#' INCLUDE STRING '\n'
                   ;
 
-parameter_list  :
-                | param_type
-                | parameter_list ',' param_type
+parameter_list  : {$$ = newDArray(ParamTypeDArray)(0);}
+                | param_type {$$ = newDArray(ParamTypeDArray)(3); daAppend(ParamTypeDArray)(&$$, &$1);}
+                | parameter_list ',' param_type {daAppend(ParamTypeDArray)(&$1, &$3); $$ = $1;}
                 ;
 
-param_type  : REG
-            | REGMEM
-            | REGMEMIMM
-            | IMM
+param_type  : REG {$$ = P_REG;}
+            | REGMEM {$$ = P_REG_MEM;}
+            | REGMEMIMM {$$ = P_REG_MEM_IMM;}
+            | IMM {$$ = P_IMM;}
             ;
 
 
@@ -397,7 +416,7 @@ stack       : '[' imm ']' {a.iVal = $2.iVal; $$ = a;}
 %%
 
 
-void yyerror (InstructionList *result, char const *s)
+void yyerror (InstructionList *result, UserMacroTable *userMacros, char const *s)
 {
   fprintf (stderr, "%d:%s\n", yylineno, s);
 }
