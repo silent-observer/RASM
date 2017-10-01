@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Iinclude -g -Wall -Wno-unused-function
+CFLAGS=-Iinclude -g -Wall -Wno-unused-function -Wno-unused-label
 DATA_STR_INCLUDE =	include/data_structures/dynamicarray_g.h \
 					include/data_structures/linkedlist_g.h \
 					include/data_structures/redblacktree_g.h \
@@ -29,7 +29,7 @@ objfiles/main.o: include/addresser.h include/replacer.h
 source/lex.yy.c: lexer.l
 	flex -o$@ $<
 source/parser.tab.c include/y.tab.h: parser.y
-	bison -t -v -osource/parser.tab.c --defines=include/y.tab.h parser.y
+	bison -t -osource/parser.tab.c --defines=include/y.tab.h parser.y
 
 .PHONY: clean
 clean : 
