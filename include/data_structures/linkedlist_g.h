@@ -43,11 +43,11 @@ static LListName newLList(LListName)(void (*dstr)(LListNode(LListName)*)) {     
                                                                                 \
 static void deleteLList(LListName)(LListName list) {                            \
     if (list.start) {                                                           \
-        for (LListNode(LListName) *n = list.start->next;                    \
-                n != NULL; n = n->next) {                                   \
-            list.dstr(n->prev);                                             \
-        }                                                                   \
-        list.dstr(list.end);                                                \
+        for (LListNode(LListName) *n = list.start->next;                        \
+                n != NULL; n = n->next) {                                       \
+            list.dstr(n->prev);                                                 \
+        }                                                                       \
+        list.dstr(list.end);                                                    \
     }                                                                           \
 }                                                                               \
                                                                                 \
@@ -145,10 +145,11 @@ static void llRemoveL(LListName)(LListName *list, LListName elements) {         
     deleteLList(LListName)(elements);                                           \
 }                                                                               \
                                                                                 \
-static LListName llDuplicate(LListName)(const LListName list) {                 \
+static LListName llDuplicate(LListName)(const LListName list,                   \
+        type (*duplicator)(type)) {                                             \
     LListName newList = newLList(LListName)(list.dstr);                         \
     for (LListNode(LListName) *n = list.start; n != NULL; n = n->next)          \
-        llAppend(LListName)(&newList, n->data);                                 \
+        llAppend(LListName)(&newList, duplicator(n->data));                     \
     return newList;                                                             \
 }
 
