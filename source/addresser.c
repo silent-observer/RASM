@@ -13,8 +13,8 @@ static unsigned int getArgSize(Argument arg) {
         case A_ABSOLUTE: return 2;
         case A_IDENTIFIER: printf("Cannot use identifier '%s' as argument, use '%s.h' or '%s.l' instead.\n", 
             arg.text, arg.text, arg.text); exit(1);
-        case A_NO_ARG: printf("Very strange error. How here can be no argument after parsing input?\n"); exit(1);
         case A_STRING: printf("Cannot use string %s in not DW instruction.\n", arg.text); exit(1);
+        case A_MACRO_ARG: printf("Macro definition is not supported yet.\n"); exit(3);
     }
     printf("I don't understand how control can reach here.\nNevermind.\n"); 
     exit(1);
@@ -28,31 +28,31 @@ static unsigned int getInstrSize(Instruction instr) {
             case I_MUL: case I_MLL: case I_SGN: case I_RAS:
             case I_LSH: case I_RSH: case I_LRT: case I_RRT:
             case I_AND: case I_OR:  case I_XOR:
-                size += getArgSize(instr.args[0]);
-                size += getArgSize(instr.args[2]);
+                size += getArgSize(instr.args.data[0]);
+                size += getArgSize(instr.args.data[2]);
                 break;
             case I_NOT:
-                size += getArgSize(instr.args[0]);
-                size += getArgSize(instr.args[1]);
+                size += getArgSize(instr.args.data[0]);
+                size += getArgSize(instr.args.data[1]);
                 break;
             case I_JMP: // J-type
                 break;
             case I_ADDI: case I_ADCI: case I_SUBI: case I_SBCI: // I-type
             case I_ANDI: case I_ORI:  case I_XORI:
-                size += getArgSize(instr.args[0]);
-                size += getArgSize(instr.args[2]);
+                size += getArgSize(instr.args.data[0]);
+                size += getArgSize(instr.args.data[2]);
                 break;
             case I_LDI:
-                size += getArgSize(instr.args[1]);
+                size += getArgSize(instr.args.data[1]);
                 break;
             case I_LSHI: case I_RSHI: case I_LRTI: case I_RRTI: // SI-type
-                size += getArgSize(instr.args[0]);
-                size += getArgSize(instr.args[2]);
+                size += getArgSize(instr.args.data[0]);
+                size += getArgSize(instr.args.data[2]);
                 break;
             case I_JFC: case I_JFS: case I_FLC: case I_FLS: // F-type
                 break;
             case I_PUSH: case I_POP: // SP-type
-                size += getArgSize(instr.args[0]);
+                size += getArgSize(instr.args.data[0]);
                 break;
             case I_SVPC: case I_RET:
                 break;
@@ -60,8 +60,8 @@ static unsigned int getInstrSize(Instruction instr) {
     else
         switch (instr.mType) {
             case M_MOV:
-                size += getArgSize(instr.args[0]);
-                size += getArgSize(instr.args[1]);
+                size += getArgSize(instr.args.data[0]);
+                size += getArgSize(instr.args.data[1]);
                 break;
             case M_JVC: case M_JVS: case M_JNE: case M_JEQ:
             case M_JGE: case M_JLT: case M_JCC: case M_JCS:
@@ -73,9 +73,9 @@ static unsigned int getInstrSize(Instruction instr) {
                 break;
             case M_DW: 
             {
-                if (instr.args[0].type != A_STRING)
+                if (instr.args.data[0].type != A_STRING)
                     break;
-                for (char *c = instr.args[0].text; *c;) {
+                for (char *c = instr.args.data[0].text; *c;) {
                     if (*c == '\\') {
                         c++;
                         if (*c++ != 'x')
@@ -97,6 +97,7 @@ static unsigned int getInstrSize(Instruction instr) {
             case M_LABEL: case M_LABEL_ASSIGN:
                 size = 0;
                 break;
+            case M_USER_MACRO: case M_INCLUDE: printf("Macro definition is not supported yet.\n"); exit(2);
         }
     return size;
 }
@@ -110,9 +111,9 @@ LabelTable addAddresses(InstructionList *list) {
         if (n->data.isMacro && (n->data.mType == M_LABEL || 
                                 n->data.mType == M_LABEL_ASSIGN)) {
             if (n->data.mType == M_LABEL)
-                rbtSet(LabelTable)(&labels, strdup(n->data.args[0].text), currAddr);
+                rbtSet(LabelTable)(&labels, strdup(n->data.args.data[0].text), currAddr);
             else
-                rbtSet(LabelTable)(&labels, strdup(n->data.args[0].text), n->data.args[1].iVal);
+                rbtSet(LabelTable)(&labels, strdup(n->data.args.data[0].text), n->data.args.data[1].iVal);
             if (n->next) {
                 n = n->next;
                 llRemove(InstructionList)(list, n->prev);

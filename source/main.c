@@ -7,6 +7,7 @@
 
 extern FILE* yyin;
 extern int yylex();
+extern int yyparse(InstructionList *list);
 extern LabelTable labels;
 //extern YYSTYPE yylval;
 extern char *yytext;
@@ -15,11 +16,10 @@ void printLabel(LabelTableEntry entry) {
     printf("%s = %04lX\n", entry->key, entry->value);
 }
 
-void printArgs(Argument *args, bool isReplaced) {
-    for (int i = 0; i < 3; i++) {
-        Argument a = args[i];
+void printArgs(ArgumentDArray args, bool isReplaced) {
+    for (int i = 0; i < args.size; i++) {
+        Argument a = args.data[i];
         switch (a.type) {
-            case A_NO_ARG: break;
             case A_REGISTER: switch (a.rType) {
                     case REG_A: printf(" A"); break;
                     case REG_B: printf(" B"); break;
@@ -39,6 +39,7 @@ void printArgs(Argument *args, bool isReplaced) {
             case A_IDENTIFIER: printf(" %s", a.text); break;
             case A_ID_HIGH: printf(" %s.h", a.text); break;
             case A_ID_LOW: printf(" %s.l", a.text); break;
+            case A_MACRO_ARG: printf("$%ld", a.iVal); break;
         }
     }
 }
@@ -61,6 +62,8 @@ void printInstr(Instruction instr, bool isReplaced) {
             case M_DW: printf("DW"); break;
             case M_LABEL: printf("LABEL"); break;
             case M_LABEL_ASSIGN: printf("LABEL ="); break;
+            case M_USER_MACRO: printf("$"); break;
+            case M_INCLUDE: printf("#include"); break;
         }
     else
         switch (instr.iType) {
@@ -129,6 +132,10 @@ int main(int argc, char *argv[]) {
     printf("    LABELS:\n");
     foreachRBT(LabelTable)(labels, &printLabel);
 
+    printf("    ADDRESSES:\n");
+    for (InstructionListNode *n = list.start; n; n = n->next)
+        printInstr(n->data, false);
+
     replaceLabelsAndMacros(&list, labels);
 
     printf("    REPLACED:\n");
@@ -138,6 +145,8 @@ int main(int argc, char *argv[]) {
     DString str = synthesize(list);
     FILE *out = fopen(argv[2], "w");
     fprintf(out, "%s\n", str.data);
+    fclose(yyin);
+    fclose(out);
     deleteLList(InstructionList)(list);
     free(str.data);
 }

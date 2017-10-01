@@ -10,9 +10,11 @@ void dstrLabelTableEntry(LabelTableEntry entry) {
     free(entry);
 }
 void dstrInstr(InstructionListNode *n) {
-    for (int i = 0; i < 3; i++)
-        if (n->data.args[i].type == A_STRING ||
-            n->data.args[i].type == A_IDENTIFIER)
-            free(n->data.args[i].text);
+    for (int i = 0; i < n->data.args.size; i++) {
+        if (n->data.args.data[i].type == A_STRING ||
+            n->data.args.data[i].type == A_IDENTIFIER)
+            free(n->data.args.data[i].text);
+    }
     free(n);
+    free(n->data.args.data);
 }

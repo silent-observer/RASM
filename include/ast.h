@@ -1,6 +1,7 @@
 #ifndef TOKEN
 #define TOKEN
 
+#include "data_structures/dynamicarray_g.h"
 #include "data_structures/linkedlist_g.h"
 #include "data_structures/redblacktree_g.h"
 #include <stdbool.h>
@@ -25,7 +26,6 @@ enum instrType {
 };
 
 enum argType {
-    A_NO_ARG,
     A_REGISTER,
     A_CONSTANT,
     A_ADDRESSED,
@@ -35,7 +35,8 @@ enum argType {
     A_STRING,
     A_IDENTIFIER,
     A_ID_HIGH,
-    A_ID_LOW
+    A_ID_LOW,
+    A_MACRO_ARG
 };
 enum registerType {
     REG_SP,
@@ -47,7 +48,8 @@ enum macroType {
     M_JVC, M_JVS, M_JNE, M_JEQ,
     M_JGE, M_JLT, M_JCC, M_JCS,
     M_CALL, M_HALT, M_DW,
-    M_LABEL, M_LABEL_ASSIGN
+    M_LABEL, M_LABEL_ASSIGN,
+    M_INCLUDE, M_USER_MACRO
 };
 
 typedef struct {
@@ -59,6 +61,11 @@ typedef struct {
     };
 } Argument;
 
+#ifndef ARGUMENT_DARRAY
+    #define ARGUMENT_DARRAY
+    defineDArray(ArgumentDArray, Argument)
+#endif
+
 typedef struct {
     unsigned long int address;
     bool isMacro;
@@ -66,7 +73,7 @@ typedef struct {
         enum instrType iType;
         enum macroType mType;
     };
-    Argument args[3];
+    ArgumentDArray args;
 } Instruction;
 
 #ifndef LABEL_TABLE

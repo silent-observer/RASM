@@ -11,6 +11,7 @@
 #define daAppendN(DArrayName) daAppendN_ ## DArrayName
 #define daAppend(DArrayName) daAppend_ ## DArrayName
 #define daAppendArr(DArrayName) daAppendArr_ ## DArrayName
+#define daSetSize(DArrayName) daSetSize_ ## DArrayName
 
 #define defineDArray(DArrayName, type)                                          \
 typedef struct {                                                                \
@@ -32,20 +33,24 @@ static DArrayName newDArray(DArrayName)(size_t baseCapasity) {                  
     return res;                                                                 \
 }                                                                               \
                                                                                 \
-static void daAppendN(DArrayName) (DArrayName *array,                           \
-        const type *data, size_t count) {                                       \
-    if (array->size + count > array->capasity) {                                \
-        type *newData = (type *) calloc( (count+array->capasity)*2,             \
+static void daSetSize(DArrayName) (DArrayName *array, size_t count) {           \
+    if (count > array->capasity) {                                              \
+        type *newData = (type *) calloc( count + 5,                             \
             sizeof(type));                                                      \
         test(!newData, "Cannot allocate memory for dynamic array");             \
-        memcpy(newData, array->data, array->capasity);                          \
+        memcpy(newData, array->data, array->size*sizeof(type));                 \
         free(array->data);                                                      \
         array->data = newData;                                                  \
-        array->capasity = (count+array->capasity)*2;                            \
+        array->capasity = count + 5;                                            \
     }                                                                           \
-    memcpy((type *)array->data + array->size, data,                             \
+    array->size = count;                                                        \
+}                                                                               \
+                                                                                \
+static void daAppendN(DArrayName) (DArrayName *array,                           \
+        const type *data, size_t count) {                                       \
+    daSetSize(DArrayName)(array, array->size + count);                          \
+    memcpy((type *)array->data + array->size - count, data,                     \
         sizeof(type)*count);                                                    \
-    array->size += count;                                                       \
 }                                                                               \
                                                                                 \
 static void daAppend(DArrayName)(DArrayName *array, const type *data) {         \
@@ -55,6 +60,6 @@ static void daAppend(DArrayName)(DArrayName *array, const type *data) {         
 static void daAppendArr(DArrayName)(DArrayName *array,                          \
         DArrayName *data) {                                                     \
     daAppendN(DArrayName)(array, data->data, data->size);                       \
-}
+}                                                                               \
 
 #endif
