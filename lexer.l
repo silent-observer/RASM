@@ -98,10 +98,10 @@ INCLUDE|include   { count(); return INCLUDE;}
 %{
     // Argument types
 %}
-REG|reg             { count(); return REG;}
-REGMEM|regmem       { count(); return REGMEM;}
-REGMEMIMM|regmemimm { count(); return REGMEMIMM;}
-IMM|imm             { count(); return IMM;}
+R|r     { count(); return REG;}
+RM|rm   { count(); return REGMEM;}
+RMI|rmi { count(); return REGMEMIMM;}
+I|i     { count(); return IMM;}
 %{
     // Register
 %}
