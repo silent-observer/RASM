@@ -6,6 +6,7 @@
 #include "addresser.h"
 #include "cmpAndDstrFuncs.h"
 #include "userMacroReplacer.h"
+#include "includeReplacer.h"
 
 extern FILE* yyin;
 extern int yylex();
@@ -134,15 +135,10 @@ int main(int argc, char *argv[]) {
         printf("Usage: rasm <input.rcpu> <output.mif>\n");
         exit(1);
     }
-    yyin = fopen(argv[1], "r");
-    //yydebug = 1;
-    /*for (int i = yylex(); i; i = yylex()) {
-        printf("(%d, %s)\n", i, yytext);
-    }*/
     InstructionList list;
-    UserMacroTable userMacros = newRBT(UserMacroTable)(&cmpStr, &dstrUserMacroTableEntry);
-    if (yyparse(&list, &userMacros))
-        exit(1);
+    UserMacroTable userMacros;
+    parseProgram(argv[1], &list, &userMacros);
+    yyin = fopen(argv[1], "r");
 
     printf("    USER MACROS:\n");
     foreachRBT(UserMacroTable)(userMacros, &printUserMacroTableEntry);

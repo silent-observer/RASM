@@ -118,7 +118,10 @@ LabelTable addAddresses(InstructionList *list) {
                 n = n->next;
                 llRemove(InstructionList)(list, n->prev);
             }
-            else break;
+            else { 
+                llRemove(InstructionList)(list, n); 
+                break;
+            }
         } else n = n->next;
     }
     return labels;

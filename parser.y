@@ -54,7 +54,7 @@
 %token <iVal> HEX BINARY DECIMAL CHAR
 
 %type <iList> instruction_list
-%type <instr> instruction simple_instr macro_instr label user_macro
+%type <instr> instruction simple_instr macro_instr label user_macro include_directive
 %type <iType> a_type i_type si_type jfg_type flg_type
 %type <mType> jfg_macro
 
@@ -89,7 +89,11 @@ instruction_list : instruction_list {memset(&i, 0, sizeof i);} instruction
                 | instruction_list '\n'
                     {$$ = $1;}
                 | instruction_list macro_definition
-                | instruction_list include_directive
+                | instruction_list {memset(&i, 0, sizeof i);} include_directive 
+                    {
+                        llAppend(InstructionList)(&$1, $3);
+                        $$ = $1;
+                    }
                 |
                     {
                         $$ = newLList(InstructionList)(&dstrInstr);
@@ -118,20 +122,28 @@ label   : IDENTIFIER ':' '\n'
             }
         ;
 
-macro_definition : '#' DEFMACRO IDENTIFIER '[' parameter_list ']' '\n' 
+macro_definition : DEFMACRO IDENTIFIER '[' parameter_list ']' '\n' 
                     {
                         isInUserMacroDef = true;
-                        currUserMacro.paramTypes = $5;
+                        currUserMacro.paramTypes = $4;
                     } 
                     instruction_list ENDDEF '\n'
                     {
                         isInUserMacroDef = false;
-                        currUserMacro.instrs = $9;
-                        rbtSet(UserMacroTable)(userMacros, $3, currUserMacro);
+                        currUserMacro.instrs = $8;
+                        rbtSet(UserMacroTable)(userMacros, $2, currUserMacro);
                     } 
                  ;
 
-include_directive : '#' INCLUDE STRING '\n'
+include_directive : INCLUDE STRING '\n' {
+                        i.isMacro = true; 
+                        i.mType = M_INCLUDE; 
+                        i.args = newDArray(ArgumentDArray)(1);
+                        a.type = A_STRING;
+                        a.text = $2;
+                        daAppend(ArgumentDArray)(&i.args, &a);
+                        $$ = i;
+                    }
                   ;
 
 parameter_list  : {$$ = newDArray(ParamTypeDArray)(0);}
