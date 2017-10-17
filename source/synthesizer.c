@@ -171,7 +171,7 @@ DString synthesize(InstructionList list) {
                 sprintf(buffer, "%04lx ", (instr.args.data[i].iVal & 0xFFFF0000) >> 16);
                 daAppendN(DString)(&result, buffer, strlen(buffer));
             }
-            if (synth[i] &&
+            if (synth[i] && !(instr.isMacro == true && instr.mType == M_DW) &&
                 (instr.args.data[i].type == A_CONSTANT ||
                  instr.args.data[i].type == A_ABSOLUTE ||
                  instr.args.data[i].type == A_STACK)) {
