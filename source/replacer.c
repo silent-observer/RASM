@@ -29,6 +29,7 @@ static void replaceMacro(InstructionList *list, InstructionListNode *n) {
         n->data.args.data[1].type = A_ZERO;
         n->data.args.data[1].iVal = 0;
     } else if (n->data.mType >= M_JVC && n->data.mType <= M_JCS) {
+        daSetSize(ArgumentDArray)(&n->data.args, 2);
         n->data.args.data[1].type = A_CONSTANT;
         switch (n->data.mType) {
             case M_JVC: case M_JVS:
