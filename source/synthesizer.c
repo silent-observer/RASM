@@ -125,9 +125,9 @@ DString synthesize(InstructionList list) {
                 exit(1);
             }
             val = 0x4000;
-            val |= ((instr.iType - I_ADDI) & 0x6) << 12;
+            val |= ((instr.iType - I_ADDI) & 0x3) << 12;
             val |= synthArg(true, instr.args.data[0]) << 9;
-            val |= ((instr.iType - I_ADDI) & 0x1) << 8;
+            val |= ((instr.iType - I_ADDI) >> 2) << 8;
             val |= instr.args.data[1].iVal & 0x00FF;
             synth[1] = false;
         } else if (instr.iType == I_LDI) {
