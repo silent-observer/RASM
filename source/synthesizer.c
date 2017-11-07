@@ -64,7 +64,7 @@ DString synthesize(InstructionList list) {
         unsigned short val;
         bool synth[3] = {true, true, true};
         if (instr.isMacro && instr.mType == M_DW) {
-            if (instr.args.data[0].type == A_CONSTANT)
+            if (instr.args.data[0].type == A_CONSTANT || instr.args.data[0].type == A_ZERO)
                 val = instr.args.data[0].iVal;
             else {
                 for (char *c = instr.args.data[0].text+1; *c && *c != '\"'; c++)
