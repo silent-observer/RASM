@@ -19,31 +19,44 @@ void printLabel(LabelTableEntry entry) {
     printf("%s = %04lX\n", entry->key, entry->value);
 }
 
+void printArg(Argument a, bool isReplaced) {
+    switch (a.type) {
+        case A_REGISTER: switch (a.rType) {
+                case REG_A: printf("A"); break;
+                case REG_B: printf("B"); break;
+                case REG_C: printf("C"); break;
+                case REG_SP: printf("SP"); break;
+            } break;
+        case A_CONSTANT: printf(a.iVal < 1000? "%ld" : "%08lXh", a.iVal); break;
+        case A_ADDRESSED: printf("*A"); break;
+        case A_ABSOLUTE:    if (!isReplaced) 
+                                printf("*%s", a.text);
+                            else 
+                                printf("*%08lXh", a.iVal); 
+                            break;
+        case A_STACK: printf("[%ld]", a.iVal); break;
+        case A_ZERO: printf("0"); break;
+        case A_STRING: printf("%s", a.text); break;
+        case A_IDENTIFIER: printf("%s", a.text); break;
+        case A_ID_HIGH: printf("%s.h", a.text); break;
+        case A_ID_LOW: printf("%s.l", a.text); break;
+        case A_MACRO_ARG: printf("$%ld", a.iVal); break;
+        case A_SUM: for (int i = 0; i < a.sum->size; i++) {
+            if (i != 0) printf("+");
+            printArg(a.sum->data[i], isReplaced);
+        } break;
+        case A_INDEX: printArg(a.sum->data[a.sum->size-1], isReplaced); printf("[");
+        for (int i = 0; i < a.sum->size-1; i++) {
+            if (i != 0) printf("+");
+            printArg(a.sum->data[i], isReplaced);
+        } printf("]"); break;
+    }
+}
+
 void printArgs(ArgumentDArray args, bool isReplaced) {
     for (int i = 0; i < args.size; i++) {
-        Argument a = args.data[i];
-        switch (a.type) {
-            case A_REGISTER: switch (a.rType) {
-                    case REG_A: printf(" A"); break;
-                    case REG_B: printf(" B"); break;
-                    case REG_C: printf(" C"); break;
-                    case REG_SP: printf(" SP"); break;
-                } break;
-            case A_CONSTANT: printf(a.iVal < 1000? " %ld" : " %08lXh", a.iVal); break;
-            case A_ADDRESSED: printf(" *A"); break;
-            case A_ABSOLUTE:    if (!isReplaced) 
-                                    printf(" *%s", a.text);
-                                else 
-                                    printf(" *%08lXh", a.iVal); 
-                                break;
-            case A_STACK: printf(" [%ld]", a.iVal); break;
-            case A_ZERO: printf(" 0"); break;
-            case A_STRING: printf(" %s", a.text); break;
-            case A_IDENTIFIER: printf(" %s", a.text); break;
-            case A_ID_HIGH: printf(" %s.h", a.text); break;
-            case A_ID_LOW: printf(" %s.l", a.text); break;
-            case A_MACRO_ARG: printf(" $%ld", a.iVal); break;
-        }
+        printf(" ");
+        printArg(args.data[i], isReplaced);
     }
 }
 

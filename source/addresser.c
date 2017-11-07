@@ -9,7 +9,9 @@ static unsigned int getArgSize(Argument arg) {
         case A_STACK:
         case A_ID_HIGH:
         case A_ID_LOW:
+        case A_SUM:
         case A_CONSTANT: return 1;
+        case A_INDEX:
         case A_ABSOLUTE: return 2;
         case A_IDENTIFIER: printf("Cannot use identifier '%s' as argument, use '%s.h' or '%s.l' instead.\n", 
             arg.text, arg.text, arg.text); exit(1);

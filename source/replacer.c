@@ -2,6 +2,20 @@
 #include "error.h"
 
 static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels) {
+    if (arg.type == A_SUM || arg.type == A_INDEX) {
+        long int value = 0;
+        for (int i = 0; i < arg.sum->size; i++)
+            if (arg.sum->data[i].type == A_IDENTIFIER ||
+                arg.sum->data[i].type == A_ID_HIGH ||
+                arg.sum->data[i].type == A_ID_LOW)
+                value += replaceLabel(instr, arg.sum->data[i], labels).iVal;
+            else
+                value += arg.sum->data[i].iVal;
+        arg.iVal = value;
+        if (arg.type == A_SUM) arg.type = A_CONSTANT;
+        else arg.type = A_ABSOLUTE;
+        return arg;
+    }
     LabelTableEntry entry = rbtGet(LabelTable)(labels, arg.text);
     test(!entry, "Unknown identifier %s!\n", arg.text);
     free(arg.text);
@@ -17,6 +31,8 @@ static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels)
         arg.type == A_ID_HIGH || 
         arg.type == A_ID_LOW)
         arg.type = A_CONSTANT;
+    if (arg.iVal == 0)
+        arg.type = A_ZERO;
     return arg;
 }
 
@@ -76,7 +92,9 @@ void replaceLabelsAndMacros(InstructionList *list, LabelTable labels) {
             if (n->data.args.data[i].type == A_IDENTIFIER ||
                 n->data.args.data[i].type == A_ID_HIGH ||
                 n->data.args.data[i].type == A_ID_LOW ||
-                n->data.args.data[i].type == A_ABSOLUTE) {
+                n->data.args.data[i].type == A_ABSOLUTE ||
+                n->data.args.data[i].type == A_SUM ||
+                n->data.args.data[i].type == A_INDEX) {
                 n->data.args.data[i] = replaceLabel(n->data, n->data.args.data[i], labels);
             }
         }

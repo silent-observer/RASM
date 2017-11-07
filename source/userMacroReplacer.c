@@ -3,19 +3,29 @@
 
 void replaceUserMacros(InstructionList *list, UserMacroTable userMacros);
 
-static Instruction duplicateInstruction(Instruction instr) {
-    ArgumentDArray args = newDArray(ArgumentDArray)(instr.args.size);
-    for (int i = 0; i < instr.args.size; i++) {
-        Argument a = instr.args.data[i];
+static ArgumentDArray duplicateArgumentDArray(ArgumentDArray oldArgs) {
+    ArgumentDArray args = newDArray(ArgumentDArray)(oldArgs.size);
+    for (int i = 0; i < oldArgs.size; i++) {
+        Argument a = oldArgs.data[i];
         if (a.type == A_ABSOLUTE ||
             a.type == A_STRING ||
             a.type == A_IDENTIFIER ||
             a.type == A_ID_HIGH ||
             a.type == A_ID_LOW)
             a.text = strdup(a.text);
+        if (a.type == A_SUM ||
+            a.type == A_INDEX) {
+            ArgumentDArray *sum = (ArgumentDArray*) malloc(sizeof(ArgumentDArray));
+            *sum = duplicateArgumentDArray(*a.sum);
+            a.sum = sum;
+        }
         daAppend(ArgumentDArray)(&args, &a);
     }
-    instr.args = args;
+    return args;
+}
+
+static Instruction duplicateInstruction(Instruction instr) {
+    instr.args = duplicateArgumentDArray(instr.args);
     return instr;
 }
 
@@ -34,12 +44,14 @@ static InstructionListNode *replaceUserMacro(InstructionList *list, InstructionL
         bool isReg =    n->data.args.data[i+1].type == A_REGISTER;
         bool isMem =    n->data.args.data[i+1].type == A_ADDRESSED || 
                         n->data.args.data[i+1].type == A_ABSOLUTE ||
-                        n->data.args.data[i+1].type == A_STACK;
+                        n->data.args.data[i+1].type == A_STACK ||
+                        n->data.args.data[i+1].type == A_INDEX;
         bool isImm =    n->data.args.data[i+1].type == A_CONSTANT ||
                         n->data.args.data[i+1].type == A_ZERO ||
                         n->data.args.data[i+1].type == A_IDENTIFIER ||
                         n->data.args.data[i+1].type == A_ID_HIGH ||
-                        n->data.args.data[i+1].type == A_ID_LOW;
+                        n->data.args.data[i+1].type == A_ID_LOW ||
+                        n->data.args.data[i+1].type == A_SUM;
         bool canBeReg = entry->value.paramTypes.data[i] == P_REG ||
                         entry->value.paramTypes.data[i] == P_REG_MEM ||
                         entry->value.paramTypes.data[i] == P_REG_MEM_IMM;

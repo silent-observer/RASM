@@ -36,7 +36,9 @@ enum argType {
     A_IDENTIFIER,
     A_ID_HIGH,
     A_ID_LOW,
-    A_MACRO_ARG
+    A_MACRO_ARG,
+    A_SUM,
+    A_INDEX
 };
 enum registerType {
     REG_SP,
@@ -52,12 +54,15 @@ enum macroType {
     M_INCLUDE, M_USER_MACRO
 };
 
-typedef struct {
+struct DArray_ArgumentDArray;
+
+typedef struct Argument{
     enum argType type;
     union {
         enum registerType rType;
         char *text;
         long int iVal;
+        struct DArray_ArgumentDArray *sum;
     };
 } Argument;
 

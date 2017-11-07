@@ -14,7 +14,7 @@
 #define daSetSize(DArrayName) daSetSize_ ## DArrayName
 
 #define defineDArray(DArrayName, type)                                          \
-typedef struct {                                                                \
+typedef struct DArray(DArrayName){                                              \
     type *data;                                                                 \
     uint16_t capasity;                                                          \
     uint16_t size;                                                              \
