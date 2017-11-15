@@ -38,7 +38,9 @@ enum argType {
     A_ID_LOW,
     A_MACRO_ARG,
     A_SUM,
-    A_INDEX
+    A_INDEX, 
+    A_SUM_HIGH,
+    A_SUM_LOW
 };
 enum registerType {
     REG_SP,

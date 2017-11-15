@@ -10,6 +10,8 @@ static unsigned int getArgSize(Argument arg) {
         case A_ID_HIGH:
         case A_ID_LOW:
         case A_SUM:
+        case A_SUM_HIGH:
+        case A_SUM_LOW:
         case A_CONSTANT: return 1;
         case A_INDEX:
         case A_ABSOLUTE: return 2;

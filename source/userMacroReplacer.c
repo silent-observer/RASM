@@ -14,6 +14,8 @@ static ArgumentDArray duplicateArgumentDArray(ArgumentDArray oldArgs) {
             a.type == A_ID_LOW)
             a.text = strdup(a.text);
         if (a.type == A_SUM ||
+            a.type == A_SUM_HIGH ||
+            a.type == A_SUM_LOW ||
             a.type == A_INDEX) {
             ArgumentDArray *sum = (ArgumentDArray*) malloc(sizeof(ArgumentDArray));
             *sum = duplicateArgumentDArray(*a.sum);
@@ -51,7 +53,9 @@ static InstructionListNode *replaceUserMacro(InstructionList *list, InstructionL
                         n->data.args.data[i+1].type == A_IDENTIFIER ||
                         n->data.args.data[i+1].type == A_ID_HIGH ||
                         n->data.args.data[i+1].type == A_ID_LOW ||
-                        n->data.args.data[i+1].type == A_SUM;
+                        n->data.args.data[i+1].type == A_SUM || 
+                        n->data.args.data[i+1].type == A_SUM_HIGH ||
+                        n->data.args.data[i+1].type == A_SUM_LOW;
         bool canBeReg = entry->value.paramTypes.data[i] == P_REG ||
                         entry->value.paramTypes.data[i] == P_REG_MEM ||
                         entry->value.paramTypes.data[i] == P_REG_MEM_IMM;

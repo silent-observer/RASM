@@ -32,6 +32,11 @@ unsigned short synthArg(bool isIType, Argument arg) {
         case A_ID_LOW:
         case A_IDENTIFIER: printf("Very Strange Error. How identifier even got here?..\n");
                            exit(2);
+        case A_SUM_HIGH:
+        case A_SUM_LOW:
+        case A_SUM:
+        case A_INDEX:   printf("Very Strange Error. How sum even got here?..\n");
+                        exit(2);
     }
     return 0;
 }

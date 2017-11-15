@@ -60,7 +60,7 @@
 
 %type <arg> reg reg_without_macro_arg
 %type <arg> mem
-%type <arg> imm imm_without_macro_arg
+%type <arg> imm imm_without_macro_arg imm_sum
 %type <arg> dest dest_without_macro_arg dest_sp
 %type <arg> reg_mem_imm reg_mem_imm_without_macro_arg
 %type <arg> absolute addressed stack index
@@ -415,21 +415,25 @@ imm_without_macro_arg   : HEX {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
                         | IDENTIFIER {a.type = A_IDENTIFIER; a.text = $1; $$ = a;}
                         | IDENTIFIER HIGH {a.type = A_ID_HIGH; a.text = $1; $$ = a;}
                         | IDENTIFIER LOW {a.type = A_ID_LOW; a.text = $1; $$ = a;}
-                        | imm_without_macro_arg '+' imm 
-                            {
-                                if ($1.type == A_SUM) {
-                                    daAppend(ArgumentDArray)($1.sum, &$3);
-                                    $$ = $1;
-                                } else {
-                                    a.type = A_SUM;
-                                    a.sum = (ArgumentDArray*) malloc(sizeof(ArgumentDArray));
-                                    *a.sum = newDArray(ArgumentDArray)(2);
-                                    daAppend(ArgumentDArray)(a.sum, &$1);
-                                    daAppend(ArgumentDArray)(a.sum, &$3);
-                                    $$ = a;
-                                }
-                            }
+                        | imm_sum {$$ = $1;} 
+                        | '(' imm_sum ')' HIGH {$2.type = A_SUM_HIGH; $$ = $2;}
+                        | '(' imm_sum ')' LOW {$2.type = A_SUM_LOW; $$ = $2;}
                         ;
+imm_sum     : imm_without_macro_arg '+' imm 
+                {
+                    if ($1.type == A_SUM) {
+                        daAppend(ArgumentDArray)($1.sum, &$3);
+                        $$ = $1;
+                    } else {
+                        a.type = A_SUM;
+                        a.sum = (ArgumentDArray*) malloc(sizeof(ArgumentDArray));
+                        *a.sum = newDArray(ArgumentDArray)(2);
+                        daAppend(ArgumentDArray)(a.sum, &$1);
+                        daAppend(ArgumentDArray)(a.sum, &$3);
+                        $$ = a;
+                    }
+                }
+            ;
 imm : imm_without_macro_arg {$$ = $1;}
     | '$' DECIMAL {a.type = A_MACRO_ARG; a.iVal = $2; $$ = a;}
     ;

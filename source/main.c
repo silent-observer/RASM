@@ -41,15 +41,26 @@ void printArg(Argument a, bool isReplaced) {
         case A_ID_HIGH: printf("%s.h", a.text); break;
         case A_ID_LOW: printf("%s.l", a.text); break;
         case A_MACRO_ARG: printf("$%ld", a.iVal); break;
-        case A_SUM: for (int i = 0; i < a.sum->size; i++) {
-            if (i != 0) printf("+");
-            printArg(a.sum->data[i], isReplaced);
-        } break;
-        case A_INDEX: printArg(a.sum->data[a.sum->size-1], isReplaced); printf("[");
-        for (int i = 0; i < a.sum->size-1; i++) {
-            if (i != 0) printf("+");
-            printArg(a.sum->data[i], isReplaced);
-        } printf("]"); break;
+        case A_SUM_HIGH:
+        case A_SUM_LOW: printf("(");
+        case A_SUM: { 
+            for (int i = 0; i < a.sum->size; i++) {
+                if (i != 0) printf("+");
+                printArg(a.sum->data[i], isReplaced);
+            } 
+            if (a.type == A_SUM_HIGH) printf(").h");
+            else if (a.type == A_SUM_LOW) printf(").l");
+            break;
+        }
+        case A_INDEX: {
+            printArg(a.sum->data[a.sum->size-1], isReplaced); printf("[");
+            for (int i = 0; i < a.sum->size-1; i++) {
+                if (i != 0) printf("+");
+                printArg(a.sum->data[i], isReplaced);
+            } 
+            printf("]"); 
+            break;
+        }
     }
 }
 

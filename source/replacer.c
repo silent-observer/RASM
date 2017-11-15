@@ -2,7 +2,7 @@
 #include "error.h"
 
 static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels) {
-    if (arg.type == A_SUM || arg.type == A_INDEX) {
+    if (arg.type == A_SUM || arg.type == A_SUM_HIGH || arg.type == A_SUM_LOW || arg.type == A_INDEX) {
         long int value = 0;
         for (int i = 0; i < arg.sum->size; i++)
             if (arg.sum->data[i].type == A_IDENTIFIER ||
@@ -12,7 +12,10 @@ static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels)
             else
                 value += arg.sum->data[i].iVal;
         arg.iVal = value;
-        if (arg.type == A_SUM) arg.type = A_CONSTANT;
+        if (arg.type == A_SUM_HIGH) arg.iVal = (arg.iVal & 0xFFFF0000) >> 16;
+        else if (arg.type == A_SUM_LOW) arg.iVal &= 0xFFFF;
+
+        if (arg.type == A_SUM || arg.type == A_SUM_HIGH || arg.type == A_SUM_LOW) arg.type = A_CONSTANT;
         else arg.type = A_ABSOLUTE;
         return arg;
     }
@@ -94,6 +97,8 @@ void replaceLabelsAndMacros(InstructionList *list, LabelTable labels) {
                 n->data.args.data[i].type == A_ID_LOW ||
                 n->data.args.data[i].type == A_ABSOLUTE ||
                 n->data.args.data[i].type == A_SUM ||
+                n->data.args.data[i].type == A_SUM_HIGH ||
+                n->data.args.data[i].type == A_SUM_LOW ||
                 n->data.args.data[i].type == A_INDEX) {
                 n->data.args.data[i] = replaceLabel(n->data, n->data.args.data[i], labels);
             }
