@@ -41,7 +41,16 @@ static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels)
 
 static void replaceMacro(InstructionList *list, InstructionListNode *n) {
     n->data.isMacro = false;
-    if (n->data.mType == M_MOV) {
+    if (n->data.mType == M_NOP) {
+        daSetSize(ArgumentDArray)(&n->data.args, 3);
+        n->data.iType = I_ADD;
+        n->data.args.data[0].type = A_ZERO;
+        n->data.args.data[0].iVal = 0;
+        n->data.args.data[1].type = A_ZERO;
+        n->data.args.data[1].iVal = 0;
+        n->data.args.data[2].type = A_ZERO;
+        n->data.args.data[2].iVal = 0;
+    } else if (n->data.mType == M_MOV) {
         daSetSize(ArgumentDArray)(&n->data.args, 3);
         n->data.iType = I_ADD;
         n->data.args.data[2] = n->data.args.data[1];

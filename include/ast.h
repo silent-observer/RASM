@@ -20,7 +20,9 @@ enum instrType {
     // SI-type
     I_LSHI, I_RSHI, I_LRTI, I_RRTI,
     // F-type
-    I_JFC, I_JFS, I_FLC, I_FLS,
+    I_JFC, I_JFS, 
+    // LS-type
+    I_LOAD, I_SAVE,
     // SP-type
     I_PUSH, I_POP, I_SVPC, I_RET
 };
@@ -40,7 +42,8 @@ enum argType {
     A_SUM,
     A_INDEX, 
     A_SUM_HIGH,
-    A_SUM_LOW
+    A_SUM_LOW,
+    A_FASTMEM
 };
 enum registerType {
     REG_SP,
@@ -48,6 +51,7 @@ enum registerType {
 };
 
 enum macroType {
+    M_NOP,
     M_MOV,
     M_JVC, M_JVS, M_JNE, M_JEQ,
     M_JGE, M_JLT, M_JCC, M_JCS,

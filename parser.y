@@ -36,9 +36,11 @@
 %token ADDI ADCI SUBI SBCI
 %token ANDI ORI XORI LDI
 %token LSHI RSHI LRTI RRTI
-%token JFC JFS FLC FLS
+%token JFC JFS
+%token LOAD SAVE
 %token PUSH POP SVPC RET
 
+%token NOP
 %token MOV
 %token JVC JVS JNE JEQ
 %token JGE JLT JCC JCS
@@ -55,12 +57,12 @@
 
 %type <iList> instruction_list
 %type <instr> instruction simple_instr macro_instr label user_macro include_directive
-%type <iType> a_type i_type si_type jfg_type flg_type
+%type <iType> a_type i_type si_type f_type
 %type <mType> jfg_macro
 
 %type <arg> reg reg_without_macro_arg
-%type <arg> mem
-%type <arg> imm imm_without_macro_arg imm_sum
+%type <arg> mem fastmem
+%type <arg> imm imm_without_macro_arg imm_sum imm_sum_component
 %type <arg> dest dest_without_macro_arg dest_sp
 %type <arg> reg_mem_imm reg_mem_imm_without_macro_arg
 %type <arg> absolute addressed stack index
@@ -212,7 +214,7 @@ simple_instr    : a_type reg_mem_imm ',' reg ',' dest
                         daAppend(ArgumentDArray)(&i.args, &$6);
                         $$ = i;
                     }
-                | jfg_type imm ',' imm
+                | f_type imm ',' imm
                     {
                         i.iType = $1;
                         i.args = newDArray(ArgumentDArray)(2);
@@ -220,11 +222,20 @@ simple_instr    : a_type reg_mem_imm ',' reg ',' dest
                         daAppend(ArgumentDArray)(&i.args, &$4);
                         $$ = i;
                     }
-                | flg_type imm
+                | LOAD fastmem ',' dest
                     {
-                        i.iType = $1;
-                        i.args = newDArray(ArgumentDArray)(1);
+                        i.iType = I_LOAD;
+                        i.args = newDArray(ArgumentDArray)(2);
                         daAppend(ArgumentDArray)(&i.args, &$2);
+                        daAppend(ArgumentDArray)(&i.args, &$4);
+                        $$ = i;
+                    }
+                | SAVE reg_mem_imm ',' fastmem
+                    {
+                        i.iType = I_SAVE;
+                        i.args = newDArray(ArgumentDArray)(2);
+                        daAppend(ArgumentDArray)(&i.args, &$2);
+                        daAppend(ArgumentDArray)(&i.args, &$4);
                         $$ = i;
                     }
                 | PUSH reg_mem_imm
@@ -282,6 +293,12 @@ macro_instr : MOV reg_mem_imm ',' dest
                 {
                     i.mType = M_HALT; 
                     i.args = newDArray(ArgumentDArray)(1);
+                    $$ = i;
+                }
+            | NOP   
+                {
+                    i.mType = M_NOP; 
+                    i.args = newDArray(ArgumentDArray)(3);
                     $$ = i;
                 }
             | DW imm
@@ -357,11 +374,8 @@ si_type : LSHI {$$ = I_LSHI;}
         | RRTI {$$ = I_RRTI;}
         ;
 
-jfg_type    : JFC {$$ = I_JFC;}
+f_type    : JFC {$$ = I_JFC;}
             | JFS {$$ = I_JFS;}
-            ;
-flg_type    : FLC {$$ = I_FLC;}
-            | FLS {$$ = I_FLS;}
             ;
 
 jfg_macro   : JVC {$$ = M_JVC;}
@@ -407,7 +421,10 @@ mem : absolute {$1.type = A_ABSOLUTE; $$ = $1;}
     | stack {$1.type = A_STACK; $$ = $1;}
     ;
 
-imm_without_macro_arg   : HEX {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
+fastmem : '@' DECIMAL {a.type = A_FASTMEM; a.iVal = $2; $$ = a;}
+        | '@' '0' {a.type = A_FASTMEM; a.iVal = 0; $$ = a;}
+
+imm_sum_component       : HEX {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
                         | BINARY {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
                         | DECIMAL {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
                         | CHAR {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
@@ -415,15 +432,17 @@ imm_without_macro_arg   : HEX {a.type = A_CONSTANT; a.iVal = $1; $$ = a;}
                         | IDENTIFIER {a.type = A_IDENTIFIER; a.text = $1; $$ = a;}
                         | IDENTIFIER HIGH {a.type = A_ID_HIGH; a.text = $1; $$ = a;}
                         | IDENTIFIER LOW {a.type = A_ID_LOW; a.text = $1; $$ = a;}
+
+imm_without_macro_arg   : imm_sum_component {$$ = $1;}
                         | imm_sum {$$ = $1;} 
                         | '(' imm_sum ')' HIGH {$2.type = A_SUM_HIGH; $$ = $2;}
                         | '(' imm_sum ')' LOW {$2.type = A_SUM_LOW; $$ = $2;}
                         ;
-imm_sum     : imm_without_macro_arg '+' imm 
+imm_sum     : imm_sum_component '+' imm 
                 {
-                    if ($1.type == A_SUM) {
-                        daAppend(ArgumentDArray)($1.sum, &$3);
-                        $$ = $1;
+                    if ($3.type == A_SUM) {
+                        daAppend(ArgumentDArray)($3.sum, &$1);
+                        $$ = $3;
                     } else {
                         a.type = A_SUM;
                         a.sum = (ArgumentDArray*) malloc(sizeof(ArgumentDArray));

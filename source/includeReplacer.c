@@ -5,6 +5,7 @@
 #include "error.h"
 
 extern FILE* yyin;
+extern int yylineno;
 extern int yylex();
 extern int yyparse(InstructionList *list, UserMacroTable *userMacros);
 
@@ -17,6 +18,7 @@ void parseProgram(char *filename, InstructionList *list, UserMacroTable *userMac
         exit(1);
     }
     *userMacros = newRBT(UserMacroTable)(&cmpStr, &dstrUserMacroTableEntry);
+    yylineno = 1;
     if (yyparse(list, userMacros))
         exit(1);
     replaceIncludes(list, userMacros);

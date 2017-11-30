@@ -65,8 +65,11 @@ RRTI|rrti       { count(); return RRTI;}
 %}
 JFC|jfc         { count(); return JFC;}
 JFS|jfs         { count(); return JFS;}
-FLC|flc         { count(); return FLC;}
-FLS|fls         { count(); return FLS;}
+%{
+    // LS-type
+%}
+LOAD|load       { count(); return LOAD;}
+SAVE|save       { count(); return SAVE;}
 %{
     // SP-type
 %}
@@ -77,6 +80,7 @@ RET|ret         { count(); return RET;}
 %{
     // Macros
 %}
+NOP|nop         { count(); return NOP;}
 MOV|mov         { count(); return MOV;}
 JVC|jvc         { count(); return JVC;}
 JVS|jvs         { count(); return JVS;}
@@ -121,7 +125,7 @@ SP|sp { count(); return SP;}
 [+-]?0*[0-1]+b { count(); yylval.iVal = strtoul(yytext, NULL, 2) & 0xFFFFFFFF; return BINARY;}
 [+-]?[1-9][0-9]* { count(); yylval.iVal = strtol(yytext, NULL, 10) & 0xFFFFFFFF; return DECIMAL;}
 [a-zA-Z_][a-zA-Z0-9_]* { count(); yylval.text = strdup(yytext); return IDENTIFIER;}
-[\[\]*,:=\n0$+()] { count(); return yytext[0];}
+[\[\]*,:=\n0$+()@] { count(); return yytext[0];}
 
 . {}
 

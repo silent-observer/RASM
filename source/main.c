@@ -61,6 +61,7 @@ void printArg(Argument a, bool isReplaced) {
             printf("]"); 
             break;
         }
+        case A_FASTMEM: printf("@%ld", a.iVal); break;
     }
 }
 
@@ -75,6 +76,7 @@ void printInstr(Instruction instr, bool isReplaced) {
     printf("%04lX:", instr.address);
     if (instr.isMacro)
         switch (instr.mType) {
+            case M_NOP: printf("NOP"); break;
             case M_MOV: printf("MOV"); break;
             case M_JVC: printf("JVC"); break;
             case M_JVS: printf("JVS"); break;
@@ -125,8 +127,8 @@ void printInstr(Instruction instr, bool isReplaced) {
             case I_RRTI: printf("RRTI"); break;
             case I_JFC: printf("JFC"); break;
             case I_JFS: printf("JFS"); break;
-            case I_FLC: printf("FLC"); break;
-            case I_FLS: printf("FLS"); break;
+            case I_LOAD: printf("LOAD"); break;
+            case I_SAVE: printf("SAVE"); break;
             case I_PUSH: printf("PUSH"); break;
             case I_POP: printf("POP"); break;
             case I_SVPC: printf("SVPC"); break;

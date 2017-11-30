@@ -5,6 +5,7 @@ static unsigned int getArgSize(Argument arg) {
     switch (arg.type) {
         case A_ZERO:
         case A_ADDRESSED:
+        case A_FASTMEM:
         case A_REGISTER: return 0;
         case A_STACK:
         case A_ID_HIGH:
@@ -53,7 +54,13 @@ static unsigned int getInstrSize(Instruction instr) {
                 size += getArgSize(instr.args.data[0]);
                 size += getArgSize(instr.args.data[2]);
                 break;
-            case I_JFC: case I_JFS: case I_FLC: case I_FLS: // F-type
+            case I_JFC: case I_JFS: // F-type
+                break;
+            case I_LOAD:
+                size += getArgSize(instr.args.data[1]);
+                break;
+            case I_SAVE:
+                size += getArgSize(instr.args.data[0]);
                 break;
             case I_PUSH: case I_POP: // SP-type
                 size += getArgSize(instr.args.data[0]);
@@ -63,6 +70,8 @@ static unsigned int getInstrSize(Instruction instr) {
         }
     else
         switch (instr.mType) {
+            case M_NOP:
+                break;
             case M_MOV:
                 size += getArgSize(instr.args.data[0]);
                 size += getArgSize(instr.args.data[1]);

@@ -37,6 +37,8 @@ unsigned short synthArg(bool isIType, Argument arg) {
         case A_SUM:
         case A_INDEX:   printf("Very Strange Error. How sum even got here?..\n");
                         exit(2);
+        case A_FASTMEM: printf("Very Strange Error. synthArg shouldn't be used on fastmem argument\n");
+                        exit(2);
     }
     return 0;
 }
@@ -149,18 +151,28 @@ DString synthesize(InstructionList list) {
             val |= synthArg(false, instr.args.data[2]) << 4;
             val |= instr.args.data[1].iVal & 0x000F;
             synth[1] = false;
-        } else if (instr.iType >= I_JFC && instr.iType <= I_JFS) {
+        } else if (instr.iType == I_JFC) {
             val = 0x2000;
-            val |= (instr.iType - I_JFC) << 10;
-            val |= (instr.args.data[1].iVal & 0x0003) << 8;
+            val |= (instr.args.data[1].iVal & 0x0003) << 9;
             val |= instr.args.data[0].iVal & 0x00FF;
             synth[0] = false;
             synth[1] = false;
-        } else if (instr.iType >= I_FLC && instr.iType <= I_FLS) {
-            val = 0x2000;
-            val |= (instr.iType - I_JFC) << 10;
-            val |= (instr.args.data[0].iVal & 0x0003) << 8;
+        } else if (instr.iType == I_JFS) {
+            val = 0x2800;
+            val |= (instr.args.data[1].iVal & 0x0003) << 9;
+            val |= instr.args.data[0].iVal & 0x00FF;
             synth[0] = false;
+            synth[1] = false;
+        } else if (instr.iType == I_LOAD) {
+            val = 0x2100;
+            val |= synthArg(false, instr.args.data[1]) << 9;
+            val |= instr.args.data[0].iVal & 0x007F;
+            synth[0] = false;
+        } else if (instr.iType == I_SAVE) {
+            val = 0x2180;
+            val |= synthArg(false, instr.args.data[0]) << 9;
+            val |= instr.args.data[1].iVal & 0x007F;
+            synth[1] = false;
         } else if (instr.iType == I_PUSH || instr.iType == I_POP) {
             val = 0x3000;
             val |= synthArg(false, instr.args.data[0]) << 9;
