@@ -77,9 +77,9 @@
     static bool isInUserMacroDef;
     static UserMacro currUserMacro;
     int yylex();
-    void yyerror(InstructionList *result, UserMacroTable *userMacros, const char *s);
+    void yyerror(InstructionList *result, UserMacroTable *userMacros, char *filename, const char *s);
     int calcLength (char *str);
-    int yylineno;
+    extern int lineno;
 
 
 /* Line 189 of yacc.c  */
@@ -189,7 +189,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 19 "parser.y"
+#line 20 "parser.y"
 
     InstructionList iList;
     Instruction instr;
@@ -565,19 +565,19 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    77,    77,    80,    80,    85,    85,    91,    93,    94,
-      94,   100,   106,   115,   128,   127,   140,   151,   152,   153,
-     156,   157,   158,   159,   163,   164,   165,   167,   176,   184,
-     191,   200,   208,   217,   225,   233,   241,   248,   255,   261,
-     268,   276,   283,   292,   298,   304,   311,   322,   330,   339,
-     345,   346,   347,   348,   349,   350,   351,   352,   353,   354,
-     355,   356,   357,   358,   359,   362,   363,   364,   365,   366,
-     367,   368,   371,   372,   373,   374,   377,   378,   381,   382,
-     383,   384,   385,   386,   387,   388,   391,   392,   393,   395,
-     396,   399,   400,   401,   403,   404,   406,   407,   410,   411,
-     412,   414,   415,   418,   419,   420,   421,   424,   425,   427,
-     428,   429,   430,   431,   432,   433,   434,   436,   437,   438,
-     439,   441,   456,   457,   462,   463,   477,   478
+       0,    78,    78,    81,    81,    89,    89,    97,    99,   100,
+     100,   108,   114,   123,   136,   135,   148,   159,   160,   161,
+     164,   165,   166,   167,   171,   172,   173,   175,   184,   192,
+     199,   208,   216,   225,   233,   241,   249,   256,   263,   269,
+     276,   284,   291,   300,   306,   312,   319,   330,   338,   347,
+     353,   354,   355,   356,   357,   358,   359,   360,   361,   362,
+     363,   364,   365,   366,   367,   370,   371,   372,   373,   374,
+     375,   376,   379,   380,   381,   382,   385,   386,   389,   390,
+     391,   392,   393,   394,   395,   396,   399,   400,   401,   403,
+     404,   407,   408,   409,   411,   412,   414,   415,   418,   419,
+     420,   422,   423,   426,   427,   428,   429,   432,   433,   435,
+     436,   437,   438,   439,   440,   441,   442,   444,   445,   446,
+     447,   449,   464,   465,   470,   471,   485,   486
 };
 #endif
 
@@ -854,7 +854,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (result, userMacros, YY_("syntax error: cannot back up")); \
+      yyerror (result, userMacros, filename, YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
@@ -934,7 +934,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value, Location, result, userMacros); \
+		  Type, Value, Location, result, userMacros, filename); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -948,16 +948,17 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, InstructionList *result, UserMacroTable *userMacros)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, InstructionList *result, UserMacroTable *userMacros, char *filename)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacros)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacros, filename)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     InstructionList *result;
     UserMacroTable *userMacros;
+    char *filename;
 #endif
 {
   if (!yyvaluep)
@@ -965,6 +966,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacr
   YYUSE (yylocationp);
   YYUSE (result);
   YYUSE (userMacros);
+  YYUSE (filename);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -986,16 +988,17 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacr
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, InstructionList *result, UserMacroTable *userMacros)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, InstructionList *result, UserMacroTable *userMacros, char *filename)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacros)
+yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacros, filename)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     InstructionList *result;
     UserMacroTable *userMacros;
+    char *filename;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -1005,7 +1008,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacros)
 
   YY_LOCATION_PRINT (yyoutput, *yylocationp);
   YYFPRINTF (yyoutput, ": ");
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacros);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, result, userMacros, filename);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -1048,15 +1051,16 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, InstructionList *result, UserMacroTable *userMacros)
+yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, InstructionList *result, UserMacroTable *userMacros, char *filename)
 #else
 static void
-yy_reduce_print (yyvsp, yylsp, yyrule, result, userMacros)
+yy_reduce_print (yyvsp, yylsp, yyrule, result, userMacros, filename)
     YYSTYPE *yyvsp;
     YYLTYPE *yylsp;
     int yyrule;
     InstructionList *result;
     UserMacroTable *userMacros;
+    char *filename;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -1070,7 +1074,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, result, userMacros)
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , result, userMacros);
+		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , result, userMacros, filename);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -1078,7 +1082,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, result, userMacros)
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, yylsp, Rule, result, userMacros); \
+    yy_reduce_print (yyvsp, yylsp, Rule, result, userMacros, filename); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1329,22 +1333,24 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, InstructionList *result, UserMacroTable *userMacros)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, InstructionList *result, UserMacroTable *userMacros, char *filename)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep, yylocationp, result, userMacros)
+yydestruct (yymsg, yytype, yyvaluep, yylocationp, result, userMacros, filename)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
     YYLTYPE *yylocationp;
     InstructionList *result;
     UserMacroTable *userMacros;
+    char *filename;
 #endif
 {
   YYUSE (yyvaluep);
   YYUSE (yylocationp);
   YYUSE (result);
   YYUSE (userMacros);
+  YYUSE (filename);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1367,7 +1373,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (InstructionList *result, UserMacroTable *userMacros);
+int yyparse (InstructionList *result, UserMacroTable *userMacros, char *filename);
 #else
 int yyparse ();
 #endif
@@ -1406,12 +1412,13 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (InstructionList *result, UserMacroTable *userMacros)
+yyparse (InstructionList *result, UserMacroTable *userMacros, char *filename)
 #else
 int
-yyparse (result, userMacros)
+yyparse (result, userMacros, filename)
     InstructionList *result;
     UserMacroTable *userMacros;
+    char *filename;
 #endif
 #endif
 {
@@ -1683,22 +1690,25 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 77 "parser.y"
+#line 78 "parser.y"
     {*result = (yyvsp[(1) - (1)].iList);;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 80 "parser.y"
+#line 81 "parser.y"
     {memset(&i, 0, sizeof i);;}
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 81 "parser.y"
+#line 82 "parser.y"
     {
+                        (yyvsp[(3) - (3)].instr).filename = filename;
+                        (yyvsp[(3) - (3)].instr).line = lineno-1;
+                        printf("%d!\n", (yyvsp[(3) - (3)].instr).line);
                         llAppend(InstructionList)(&(yyvsp[(1) - (3)].iList), (yyvsp[(3) - (3)].instr));
                         (yyval.iList) = (yyvsp[(1) - (3)].iList);
                     ;}
@@ -1707,15 +1717,17 @@ yyreduce:
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 85 "parser.y"
+#line 89 "parser.y"
     {memset(&i, 0, sizeof i);;}
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 86 "parser.y"
+#line 90 "parser.y"
     {
+                        (yyvsp[(3) - (3)].instr).filename = filename;
+                        (yyvsp[(3) - (3)].instr).line = lineno-1;
                         (yyvsp[(3) - (3)].instr).isMacro = true; 
                         llAppend(InstructionList)(&(yyvsp[(1) - (3)].iList), (yyvsp[(3) - (3)].instr));
                         (yyval.iList) = (yyvsp[(1) - (3)].iList);
@@ -1725,22 +1737,24 @@ yyreduce:
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 92 "parser.y"
+#line 98 "parser.y"
     {(yyval.iList) = (yyvsp[(1) - (2)].iList);;}
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 94 "parser.y"
+#line 100 "parser.y"
     {memset(&i, 0, sizeof i);;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 95 "parser.y"
+#line 101 "parser.y"
     {
+                        (yyvsp[(3) - (3)].instr).filename = filename;
+                        (yyvsp[(3) - (3)].instr).line = lineno-1;
                         llAppend(InstructionList)(&(yyvsp[(1) - (3)].iList), (yyvsp[(3) - (3)].instr));
                         (yyval.iList) = (yyvsp[(1) - (3)].iList);
                     ;}
@@ -1749,7 +1763,7 @@ yyreduce:
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 100 "parser.y"
+#line 108 "parser.y"
     {
                         (yyval.iList) = newLList(InstructionList)(&dstrInstr);
                         isInUserMacroDef = false;
@@ -1759,7 +1773,7 @@ yyreduce:
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 107 "parser.y"
+#line 115 "parser.y"
     {
                 i.mType = M_LABEL;
                 i.args = newDArray(ArgumentDArray)(1);
@@ -1773,7 +1787,7 @@ yyreduce:
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 116 "parser.y"
+#line 124 "parser.y"
     {
                 i.mType = M_LABEL_ASSIGN;
                 i.args = newDArray(ArgumentDArray)(2);
@@ -1788,7 +1802,7 @@ yyreduce:
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 128 "parser.y"
+#line 136 "parser.y"
     {
                         isInUserMacroDef = true;
                         currUserMacro.paramTypes = (yyvsp[(4) - (6)].paramTypes);
@@ -1798,7 +1812,7 @@ yyreduce:
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 133 "parser.y"
+#line 141 "parser.y"
     {
                         isInUserMacroDef = false;
                         currUserMacro.instrs = (yyvsp[(8) - (10)].iList);
@@ -1809,7 +1823,7 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 140 "parser.y"
+#line 148 "parser.y"
     {
                         i.isMacro = true; 
                         i.mType = M_INCLUDE; 
@@ -1824,77 +1838,77 @@ yyreduce:
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 151 "parser.y"
+#line 159 "parser.y"
     {(yyval.paramTypes) = newDArray(ParamTypeDArray)(0);;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 152 "parser.y"
+#line 160 "parser.y"
     {(yyval.paramTypes) = newDArray(ParamTypeDArray)(3); daAppend(ParamTypeDArray)(&(yyval.paramTypes), &(yyvsp[(1) - (1)].pType));;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 153 "parser.y"
+#line 161 "parser.y"
     {daAppend(ParamTypeDArray)(&(yyvsp[(1) - (3)].paramTypes), &(yyvsp[(3) - (3)].pType)); (yyval.paramTypes) = (yyvsp[(1) - (3)].paramTypes);;}
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 156 "parser.y"
+#line 164 "parser.y"
     {(yyval.pType) = P_REG;;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 157 "parser.y"
+#line 165 "parser.y"
     {(yyval.pType) = P_REG_MEM;;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 158 "parser.y"
+#line 166 "parser.y"
     {(yyval.pType) = P_REG_MEM_IMM;;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 159 "parser.y"
+#line 167 "parser.y"
     {(yyval.pType) = P_IMM;;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 163 "parser.y"
+#line 171 "parser.y"
     {(yyvsp[(1) - (2)].instr).isMacro = false; (yyval.instr) = (yyvsp[(1) - (2)].instr);;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 164 "parser.y"
+#line 172 "parser.y"
     {(yyvsp[(1) - (2)].instr).isMacro = true; (yyval.instr) = (yyvsp[(1) - (2)].instr);;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 165 "parser.y"
+#line 173 "parser.y"
     {(yyvsp[(1) - (2)].instr).isMacro = true; (yyvsp[(1) - (2)].instr).mType = M_USER_MACRO; (yyval.instr) = (yyvsp[(1) - (2)].instr);;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 168 "parser.y"
+#line 176 "parser.y"
     {
                         i.iType = (yyvsp[(1) - (6)].iType);
                         i.args = newDArray(ArgumentDArray)(3);
@@ -1908,7 +1922,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 177 "parser.y"
+#line 185 "parser.y"
     {
                         i.iType = I_NOT;
                         i.args = newDArray(ArgumentDArray)(2);
@@ -1921,7 +1935,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 185 "parser.y"
+#line 193 "parser.y"
     {
                         i.iType = I_JMP;
                         i.args = newDArray(ArgumentDArray)(1);
@@ -1933,7 +1947,7 @@ yyreduce:
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 192 "parser.y"
+#line 200 "parser.y"
     {
                         i.iType = (yyvsp[(1) - (6)].iType);
                         i.args = newDArray(ArgumentDArray)(3);
@@ -1947,7 +1961,7 @@ yyreduce:
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 201 "parser.y"
+#line 209 "parser.y"
     {
                         i.iType = I_LDI;
                         i.args = newDArray(ArgumentDArray)(2);
@@ -1960,7 +1974,7 @@ yyreduce:
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 209 "parser.y"
+#line 217 "parser.y"
     {
                         i.iType = (yyvsp[(1) - (6)].iType);
                         i.args = newDArray(ArgumentDArray)(3);
@@ -1974,7 +1988,7 @@ yyreduce:
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 218 "parser.y"
+#line 226 "parser.y"
     {
                         i.iType = (yyvsp[(1) - (4)].iType);
                         i.args = newDArray(ArgumentDArray)(2);
@@ -1987,7 +2001,7 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 226 "parser.y"
+#line 234 "parser.y"
     {
                         i.iType = I_LOAD;
                         i.args = newDArray(ArgumentDArray)(2);
@@ -2000,7 +2014,7 @@ yyreduce:
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 234 "parser.y"
+#line 242 "parser.y"
     {
                         i.iType = I_SAVE;
                         i.args = newDArray(ArgumentDArray)(2);
@@ -2013,7 +2027,7 @@ yyreduce:
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 242 "parser.y"
+#line 250 "parser.y"
     {
                         i.iType = I_PUSH;
                         i.args = newDArray(ArgumentDArray)(1);
@@ -2025,7 +2039,7 @@ yyreduce:
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 249 "parser.y"
+#line 257 "parser.y"
     {
                         i.iType = I_POP;
                         i.args = newDArray(ArgumentDArray)(1);
@@ -2037,7 +2051,7 @@ yyreduce:
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 256 "parser.y"
+#line 264 "parser.y"
     {
                         i.iType = I_SVPC; 
                         i.args = newDArray(ArgumentDArray)(0); 
@@ -2048,7 +2062,7 @@ yyreduce:
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 262 "parser.y"
+#line 270 "parser.y"
     {
                         i.iType = I_RET; 
                         i.args = newDArray(ArgumentDArray)(0); 
@@ -2059,7 +2073,7 @@ yyreduce:
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 269 "parser.y"
+#line 277 "parser.y"
     {
                     i.mType = M_MOV;
                     i.args = newDArray(ArgumentDArray)(2);
@@ -2072,7 +2086,7 @@ yyreduce:
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 277 "parser.y"
+#line 285 "parser.y"
     {
                     i.mType = (yyvsp[(1) - (2)].mType);
                     i.args = newDArray(ArgumentDArray)(1);
@@ -2084,7 +2098,7 @@ yyreduce:
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 284 "parser.y"
+#line 292 "parser.y"
     {
                     i.mType = M_CALL;
                     a.type = A_IDENTIFIER;
@@ -2098,7 +2112,7 @@ yyreduce:
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 293 "parser.y"
+#line 301 "parser.y"
     {
                     i.mType = M_HALT; 
                     i.args = newDArray(ArgumentDArray)(1);
@@ -2109,7 +2123,7 @@ yyreduce:
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 299 "parser.y"
+#line 307 "parser.y"
     {
                     i.mType = M_NOP; 
                     i.args = newDArray(ArgumentDArray)(3);
@@ -2120,7 +2134,7 @@ yyreduce:
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 305 "parser.y"
+#line 313 "parser.y"
     {
                     i.mType = M_DW;
                     i.args = newDArray(ArgumentDArray)(1);
@@ -2132,7 +2146,7 @@ yyreduce:
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 312 "parser.y"
+#line 320 "parser.y"
     {
                     i.mType = M_DW;
                     a.type = A_STRING;
@@ -2146,7 +2160,7 @@ yyreduce:
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 323 "parser.y"
+#line 331 "parser.y"
     {
                     i.args = newDArray(ArgumentDArray)(1);
                     a.type = A_IDENTIFIER;
@@ -2159,7 +2173,7 @@ yyreduce:
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 331 "parser.y"
+#line 339 "parser.y"
     {
                     i.args = newDArray(ArgumentDArray)(4);
                     a.type = A_IDENTIFIER;
@@ -2173,7 +2187,7 @@ yyreduce:
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 340 "parser.y"
+#line 348 "parser.y"
     {
                     daAppend(ArgumentDArray)(&(yyvsp[(1) - (3)].instr).args, &(yyvsp[(3) - (3)].arg));
                     (yyval.instr) = (yyvsp[(1) - (3)].instr);
@@ -2183,504 +2197,504 @@ yyreduce:
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 345 "parser.y"
+#line 353 "parser.y"
     {(yyval.iType) = I_ADD;;}
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 346 "parser.y"
+#line 354 "parser.y"
     {(yyval.iType) = I_ADC;;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 347 "parser.y"
+#line 355 "parser.y"
     {(yyval.iType) = I_SUB;;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 348 "parser.y"
+#line 356 "parser.y"
     {(yyval.iType) = I_SBC;;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 349 "parser.y"
+#line 357 "parser.y"
     {(yyval.iType) = I_MUL;;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 350 "parser.y"
+#line 358 "parser.y"
     {(yyval.iType) = I_MLL;;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 351 "parser.y"
+#line 359 "parser.y"
     {(yyval.iType) = I_SGN;;}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 352 "parser.y"
+#line 360 "parser.y"
     {(yyval.iType) = I_RAS;;}
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 353 "parser.y"
+#line 361 "parser.y"
     {(yyval.iType) = I_LSH;;}
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 354 "parser.y"
+#line 362 "parser.y"
     {(yyval.iType) = I_RSH;;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 355 "parser.y"
+#line 363 "parser.y"
     {(yyval.iType) = I_LRT;;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 356 "parser.y"
+#line 364 "parser.y"
     {(yyval.iType) = I_RRT;;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 357 "parser.y"
+#line 365 "parser.y"
     {(yyval.iType) = I_AND;;}
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 358 "parser.y"
+#line 366 "parser.y"
     {(yyval.iType) = I_OR;;}
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 359 "parser.y"
+#line 367 "parser.y"
     {(yyval.iType) = I_XOR;;}
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 362 "parser.y"
+#line 370 "parser.y"
     {(yyval.iType) = I_ADDI;;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 363 "parser.y"
+#line 371 "parser.y"
     {(yyval.iType) = I_ADCI;;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 364 "parser.y"
+#line 372 "parser.y"
     {(yyval.iType) = I_SUBI;;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 365 "parser.y"
+#line 373 "parser.y"
     {(yyval.iType) = I_SBCI;;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 366 "parser.y"
+#line 374 "parser.y"
     {(yyval.iType) = I_ANDI;;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 367 "parser.y"
+#line 375 "parser.y"
     {(yyval.iType) = I_ORI;;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 368 "parser.y"
+#line 376 "parser.y"
     {(yyval.iType) = I_XORI;;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 371 "parser.y"
+#line 379 "parser.y"
     {(yyval.iType) = I_LSHI;;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 372 "parser.y"
+#line 380 "parser.y"
     {(yyval.iType) = I_RSHI;;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 373 "parser.y"
+#line 381 "parser.y"
     {(yyval.iType) = I_LRTI;;}
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
-#line 374 "parser.y"
+#line 382 "parser.y"
     {(yyval.iType) = I_RRTI;;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 377 "parser.y"
+#line 385 "parser.y"
     {(yyval.iType) = I_JFC;;}
     break;
 
   case 77:
 
 /* Line 1455 of yacc.c  */
-#line 378 "parser.y"
+#line 386 "parser.y"
     {(yyval.iType) = I_JFS;;}
     break;
 
   case 78:
 
 /* Line 1455 of yacc.c  */
-#line 381 "parser.y"
+#line 389 "parser.y"
     {(yyval.mType) = M_JVC;;}
     break;
 
   case 79:
 
 /* Line 1455 of yacc.c  */
-#line 382 "parser.y"
+#line 390 "parser.y"
     {(yyval.mType) = M_JVS;;}
     break;
 
   case 80:
 
 /* Line 1455 of yacc.c  */
-#line 383 "parser.y"
+#line 391 "parser.y"
     {(yyval.mType) = M_JNE;;}
     break;
 
   case 81:
 
 /* Line 1455 of yacc.c  */
-#line 384 "parser.y"
+#line 392 "parser.y"
     {(yyval.mType) = M_JEQ;;}
     break;
 
   case 82:
 
 /* Line 1455 of yacc.c  */
-#line 385 "parser.y"
+#line 393 "parser.y"
     {(yyval.mType) = M_JGE;;}
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
-#line 386 "parser.y"
+#line 394 "parser.y"
     {(yyval.mType) = M_JLT;;}
     break;
 
   case 84:
 
 /* Line 1455 of yacc.c  */
-#line 387 "parser.y"
+#line 395 "parser.y"
     {(yyval.mType) = M_JCC;;}
     break;
 
   case 85:
 
 /* Line 1455 of yacc.c  */
-#line 388 "parser.y"
+#line 396 "parser.y"
     {(yyval.mType) = M_JCS;;}
     break;
 
   case 86:
 
 /* Line 1455 of yacc.c  */
-#line 391 "parser.y"
+#line 399 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 87:
 
 /* Line 1455 of yacc.c  */
-#line 392 "parser.y"
+#line 400 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 88:
 
 /* Line 1455 of yacc.c  */
-#line 393 "parser.y"
+#line 401 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 89:
 
 /* Line 1455 of yacc.c  */
-#line 395 "parser.y"
+#line 403 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 90:
 
 /* Line 1455 of yacc.c  */
-#line 396 "parser.y"
+#line 404 "parser.y"
     {a.type = A_MACRO_ARG; a.iVal = (yyvsp[(2) - (2)].iVal); (yyval.arg) = a;;}
     break;
 
   case 91:
 
 /* Line 1455 of yacc.c  */
-#line 399 "parser.y"
+#line 407 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 92:
 
 /* Line 1455 of yacc.c  */
-#line 400 "parser.y"
+#line 408 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 93:
 
 /* Line 1455 of yacc.c  */
-#line 401 "parser.y"
+#line 409 "parser.y"
     {a.type = A_ZERO; a.iVal = 0; (yyval.arg) = a;;}
     break;
 
   case 94:
 
 /* Line 1455 of yacc.c  */
-#line 403 "parser.y"
+#line 411 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 95:
 
 /* Line 1455 of yacc.c  */
-#line 404 "parser.y"
+#line 412 "parser.y"
     {a.type = A_MACRO_ARG; a.iVal = (yyvsp[(2) - (2)].iVal); (yyval.arg) = a;;}
     break;
 
   case 96:
 
 /* Line 1455 of yacc.c  */
-#line 406 "parser.y"
+#line 414 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 97:
 
 /* Line 1455 of yacc.c  */
-#line 407 "parser.y"
+#line 415 "parser.y"
     {a.type = A_REGISTER; a.rType = REG_SP; (yyval.arg) = a;;}
     break;
 
   case 98:
 
 /* Line 1455 of yacc.c  */
-#line 410 "parser.y"
+#line 418 "parser.y"
     {a.type = A_REGISTER; a.rType = REG_A; (yyval.arg) = a;;}
     break;
 
   case 99:
 
 /* Line 1455 of yacc.c  */
-#line 411 "parser.y"
+#line 419 "parser.y"
     {a.type = A_REGISTER; a.rType = REG_B; (yyval.arg) = a;;}
     break;
 
   case 100:
 
 /* Line 1455 of yacc.c  */
-#line 412 "parser.y"
+#line 420 "parser.y"
     {a.type = A_REGISTER; a.rType = REG_C; (yyval.arg) = a;;}
     break;
 
   case 101:
 
 /* Line 1455 of yacc.c  */
-#line 414 "parser.y"
+#line 422 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 102:
 
 /* Line 1455 of yacc.c  */
-#line 415 "parser.y"
+#line 423 "parser.y"
     {a.type = A_MACRO_ARG; a.iVal = (yyvsp[(2) - (2)].iVal); (yyval.arg) = a;;}
     break;
 
   case 103:
 
 /* Line 1455 of yacc.c  */
-#line 418 "parser.y"
+#line 426 "parser.y"
     {(yyvsp[(1) - (1)].arg).type = A_ABSOLUTE; (yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 104:
 
 /* Line 1455 of yacc.c  */
-#line 419 "parser.y"
+#line 427 "parser.y"
     {(yyvsp[(1) - (1)].arg).type = A_INDEX; (yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 105:
 
 /* Line 1455 of yacc.c  */
-#line 420 "parser.y"
+#line 428 "parser.y"
     {(yyvsp[(1) - (1)].arg).type = A_ADDRESSED; (yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 106:
 
 /* Line 1455 of yacc.c  */
-#line 421 "parser.y"
+#line 429 "parser.y"
     {(yyvsp[(1) - (1)].arg).type = A_STACK; (yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 107:
 
 /* Line 1455 of yacc.c  */
-#line 424 "parser.y"
+#line 432 "parser.y"
     {a.type = A_FASTMEM; a.iVal = (yyvsp[(2) - (2)].iVal); (yyval.arg) = a;;}
     break;
 
   case 108:
 
 /* Line 1455 of yacc.c  */
-#line 425 "parser.y"
+#line 433 "parser.y"
     {a.type = A_FASTMEM; a.iVal = 0; (yyval.arg) = a;;}
     break;
 
   case 109:
 
 /* Line 1455 of yacc.c  */
-#line 427 "parser.y"
+#line 435 "parser.y"
     {a.type = A_CONSTANT; a.iVal = (yyvsp[(1) - (1)].iVal); (yyval.arg) = a;;}
     break;
 
   case 110:
 
 /* Line 1455 of yacc.c  */
-#line 428 "parser.y"
+#line 436 "parser.y"
     {a.type = A_CONSTANT; a.iVal = (yyvsp[(1) - (1)].iVal); (yyval.arg) = a;;}
     break;
 
   case 111:
 
 /* Line 1455 of yacc.c  */
-#line 429 "parser.y"
+#line 437 "parser.y"
     {a.type = A_CONSTANT; a.iVal = (yyvsp[(1) - (1)].iVal); (yyval.arg) = a;;}
     break;
 
   case 112:
 
 /* Line 1455 of yacc.c  */
-#line 430 "parser.y"
+#line 438 "parser.y"
     {a.type = A_CONSTANT; a.iVal = (yyvsp[(1) - (1)].iVal); (yyval.arg) = a;;}
     break;
 
   case 113:
 
 /* Line 1455 of yacc.c  */
-#line 431 "parser.y"
+#line 439 "parser.y"
     {a.type = A_ZERO; a.iVal = 0; (yyval.arg) = a;;}
     break;
 
   case 114:
 
 /* Line 1455 of yacc.c  */
-#line 432 "parser.y"
+#line 440 "parser.y"
     {a.type = A_IDENTIFIER; a.text = (yyvsp[(1) - (1)].text); (yyval.arg) = a;;}
     break;
 
   case 115:
 
 /* Line 1455 of yacc.c  */
-#line 433 "parser.y"
+#line 441 "parser.y"
     {a.type = A_ID_HIGH; a.text = (yyvsp[(1) - (2)].text); (yyval.arg) = a;;}
     break;
 
   case 116:
 
 /* Line 1455 of yacc.c  */
-#line 434 "parser.y"
+#line 442 "parser.y"
     {a.type = A_ID_LOW; a.text = (yyvsp[(1) - (2)].text); (yyval.arg) = a;;}
     break;
 
   case 117:
 
 /* Line 1455 of yacc.c  */
-#line 436 "parser.y"
+#line 444 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 118:
 
 /* Line 1455 of yacc.c  */
-#line 437 "parser.y"
+#line 445 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 119:
 
 /* Line 1455 of yacc.c  */
-#line 438 "parser.y"
+#line 446 "parser.y"
     {(yyvsp[(2) - (4)].arg).type = A_SUM_HIGH; (yyval.arg) = (yyvsp[(2) - (4)].arg);;}
     break;
 
   case 120:
 
 /* Line 1455 of yacc.c  */
-#line 439 "parser.y"
+#line 447 "parser.y"
     {(yyvsp[(2) - (4)].arg).type = A_SUM_LOW; (yyval.arg) = (yyvsp[(2) - (4)].arg);;}
     break;
 
   case 121:
 
 /* Line 1455 of yacc.c  */
-#line 442 "parser.y"
+#line 450 "parser.y"
     {
                     if ((yyvsp[(3) - (3)].arg).type == A_SUM) {
                         daAppend(ArgumentDArray)((yyvsp[(3) - (3)].arg).sum, &(yyvsp[(1) - (3)].arg));
@@ -2699,28 +2713,28 @@ yyreduce:
   case 122:
 
 /* Line 1455 of yacc.c  */
-#line 456 "parser.y"
+#line 464 "parser.y"
     {(yyval.arg) = (yyvsp[(1) - (1)].arg);;}
     break;
 
   case 123:
 
 /* Line 1455 of yacc.c  */
-#line 457 "parser.y"
+#line 465 "parser.y"
     {a.type = A_MACRO_ARG; a.iVal = (yyvsp[(2) - (2)].iVal); (yyval.arg) = a;;}
     break;
 
   case 124:
 
 /* Line 1455 of yacc.c  */
-#line 462 "parser.y"
+#line 470 "parser.y"
     {a.text = (yyvsp[(2) - (2)].text); (yyval.arg) = a;;}
     break;
 
   case 125:
 
 /* Line 1455 of yacc.c  */
-#line 464 "parser.y"
+#line 472 "parser.y"
     {
                     a.text = (yyvsp[(1) - (4)].text);
                     a.type = A_IDENTIFIER;
@@ -2739,21 +2753,21 @@ yyreduce:
   case 126:
 
 /* Line 1455 of yacc.c  */
-#line 477 "parser.y"
+#line 485 "parser.y"
     {a.rType = REG_A; (yyval.arg) = a;;}
     break;
 
   case 127:
 
 /* Line 1455 of yacc.c  */
-#line 478 "parser.y"
+#line 486 "parser.y"
     {a.iVal = (yyvsp[(2) - (3)].arg).iVal; (yyval.arg) = a;;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2757 "source/parser.tab.c"
+#line 2771 "source/parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2789,7 +2803,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (result, userMacros, YY_("syntax error"));
+      yyerror (result, userMacros, filename, YY_("syntax error"));
 #else
       {
 	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
@@ -2813,11 +2827,11 @@ yyerrlab:
 	if (0 < yysize && yysize <= yymsg_alloc)
 	  {
 	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (result, userMacros, yymsg);
+	    yyerror (result, userMacros, filename, yymsg);
 	  }
 	else
 	  {
-	    yyerror (result, userMacros, YY_("syntax error"));
+	    yyerror (result, userMacros, filename, YY_("syntax error"));
 	    if (yysize != 0)
 	      goto yyexhaustedlab;
 	  }
@@ -2841,7 +2855,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval, &yylloc, result, userMacros);
+		      yytoken, &yylval, &yylloc, result, userMacros, filename);
 	  yychar = YYEMPTY;
 	}
     }
@@ -2898,7 +2912,7 @@ yyerrlab1:
 
       yyerror_range[0] = *yylsp;
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp, yylsp, result, userMacros);
+		  yystos[yystate], yyvsp, yylsp, result, userMacros, filename);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -2938,7 +2952,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (result, userMacros, YY_("memory exhausted"));
+  yyerror (result, userMacros, filename, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -2946,7 +2960,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval, &yylloc, result, userMacros);
+		 yytoken, &yylval, &yylloc, result, userMacros, filename);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -2954,7 +2968,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp, yylsp, result, userMacros);
+		  yystos[*yyssp], yyvsp, yylsp, result, userMacros, filename);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -2972,12 +2986,12 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 480 "parser.y"
+#line 488 "parser.y"
 
 
 
-void yyerror (InstructionList *result, UserMacroTable *userMacros, char const *s)
+void yyerror (InstructionList *result, UserMacroTable *userMacros, char *filename, char const *s)
 {
-  fprintf (stderr, "%d:%s\n", yylineno, s);
+  fprintf (stderr, "%d in %s:%s\n", lineno, filename, s);
 }
 

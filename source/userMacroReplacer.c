@@ -28,6 +28,7 @@ static ArgumentDArray duplicateArgumentDArray(ArgumentDArray oldArgs) {
 
 static Instruction duplicateInstruction(Instruction instr) {
     instr.args = duplicateArgumentDArray(instr.args);
+    instr.source = strdup(instr.source);
     return instr;
 }
 

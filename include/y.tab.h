@@ -118,7 +118,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 19 "parser.y"
+#line 20 "parser.y"
 
     InstructionList iList;
     Instruction instr;

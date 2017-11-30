@@ -79,12 +79,15 @@ typedef struct Argument{
 
 typedef struct {
     unsigned long int address;
+    unsigned int line;
+    char *filename;
     bool isMacro;
     union {
         enum instrType iType;
         enum macroType mType;
     };
     ArgumentDArray args;
+    char *source;
 } Instruction;
 
 #ifndef LABEL_TABLE

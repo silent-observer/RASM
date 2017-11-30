@@ -79,6 +79,9 @@ static void replaceMacro(InstructionList *list, InstructionListNode *n) {
         }
     } else if (n->data.mType == M_CALL) {
         Instruction instr;
+        instr.source = strdup(n->data.source);
+        instr.filename = n->data.filename;
+        instr.line = n->data.line;
         instr.isMacro = false;
         instr.iType = I_JMP;
         instr.args = newDArray(ArgumentDArray)(1);

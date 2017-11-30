@@ -6,13 +6,14 @@
     static bool isInUserMacroDef;
     static UserMacro currUserMacro;
     int yylex();
-    void yyerror(InstructionList *result, UserMacroTable *userMacros, const char *s);
+    void yyerror(InstructionList *result, UserMacroTable *userMacros, char *filename, const char *s);
     int calcLength (char *str);
-    int yylineno;
+    extern int lineno;
 %}
 
 %parse-param {InstructionList *result}
 %parse-param {UserMacroTable *userMacros}
+%parse-param {char *filename}
 %error-verbose
 %locations
 
@@ -79,11 +80,16 @@ program : instruction_list {*result = $1;}
 
 instruction_list : instruction_list {memset(&i, 0, sizeof i);} instruction
                     {
+                        $3.filename = filename;
+                        $3.line = lineno-1;
+                        printf("%d!\n", $3.line);
                         llAppend(InstructionList)(&$1, $3);
                         $$ = $1;
                     }
                 | instruction_list {memset(&i, 0, sizeof i);} label
                     {
+                        $3.filename = filename;
+                        $3.line = lineno-1;
                         $3.isMacro = true; 
                         llAppend(InstructionList)(&$1, $3);
                         $$ = $1;
@@ -93,6 +99,8 @@ instruction_list : instruction_list {memset(&i, 0, sizeof i);} instruction
                 | instruction_list macro_definition
                 | instruction_list {memset(&i, 0, sizeof i);} include_directive 
                     {
+                        $3.filename = filename;
+                        $3.line = lineno-1;
                         llAppend(InstructionList)(&$1, $3);
                         $$ = $1;
                     }
@@ -480,7 +488,7 @@ stack       : '[' imm ']' {a.iVal = $2.iVal; $$ = a;}
 %%
 
 
-void yyerror (InstructionList *result, UserMacroTable *userMacros, char const *s)
+void yyerror (InstructionList *result, UserMacroTable *userMacros, char *filename, char const *s)
 {
-  fprintf (stderr, "%d:%s\n", yylineno, s);
+  fprintf (stderr, "%d in %s:%s\n", lineno, filename, s);
 }

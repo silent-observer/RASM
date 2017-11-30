@@ -64,10 +64,17 @@ DString synthesize(InstructionList list) {
     DString result = newDArray(DString)(DEFAULT_SIZE);
     daAppendN(DString)(&result, header, strlen(header));
     char buffer[10];
+    char *lastFilename = NULL;
     for (InstructionListNode *n = list.start; n; n = n->next) {
         Instruction instr = n->data;
-		sprintf(buffer, "%03lx: ", instr.address);
-		daAppendN(DString)(&result, buffer, strlen(buffer));
+        if (lastFilename != instr.filename) {
+            lastFilename = instr.filename;
+            daAppendN(DString)(&result, "-- \"", 4);
+            daAppendN(DString)(&result, lastFilename, strlen(lastFilename));
+            daAppendN(DString)(&result, "\"\n", 2);
+        }
+        sprintf(buffer, "%03lx: ", instr.address);
+        daAppendN(DString)(&result, buffer, strlen(buffer));
         unsigned short val;
         bool synth[3] = {true, true, true};
         if (instr.isMacro && instr.mType == M_DW) {
@@ -184,7 +191,7 @@ DString synthesize(InstructionList list) {
         sprintf(buffer, "%04x ", val);
         daAppendN(DString)(&result, buffer, strlen(buffer));
         for (int i = 0; i < instr.args.size; i++) {
-			if (synth[i] && instr.args.data[i].type == A_ABSOLUTE) {
+            if (synth[i] && instr.args.data[i].type == A_ABSOLUTE) {
                 sprintf(buffer, "%04lx ", (instr.args.data[i].iVal & 0xFFFF0000) >> 16);
                 daAppendN(DString)(&result, buffer, strlen(buffer));
             }
@@ -196,7 +203,10 @@ DString synthesize(InstructionList list) {
                 daAppendN(DString)(&result, buffer, strlen(buffer));
             }
         }
-		daAppendN(DString)(&result, ";\n", 2);
+        daAppendN(DString)(&result, "; -- ", 5);
+        sprintf(buffer, "%d: ", instr.line);
+        daAppendN(DString)(&result, buffer, strlen(buffer));
+        daAppendN(DString)(&result, instr.source, strlen(instr.source));
     }
     daAppendN(DString)(&result, end, strlen(end));
     daAppend(DString)(&result, "");

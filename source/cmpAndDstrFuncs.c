@@ -15,8 +15,9 @@ void dstrInstr(InstructionListNode *n) {
             n->data.args.data[i].type == A_IDENTIFIER)
             free(n->data.args.data[i].text);
     }
-    free(n);
     free(n->data.args.data);
+    free(n->data.source);
+    free(n);
 }
 void dstrUserMacroTableEntry(UserMacroTableEntry entry) {
     free(entry->key);

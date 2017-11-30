@@ -10,7 +10,7 @@
 
 extern FILE* yyin;
 extern int yylex();
-extern int yyparse(InstructionList *list, UserMacroTable *userMacros);
+extern int yyparse(InstructionList *list, UserMacroTable *userMacros, char *filename);
 extern LabelTable labels;
 //extern YYSTYPE yylval;
 extern char *yytext;

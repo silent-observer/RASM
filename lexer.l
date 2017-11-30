@@ -4,138 +4,131 @@
 #include "ast.h"
 #include "y.tab.h"
 
-void count();
 char parseEscapeSeq(char *str);
 
-unsigned int line = 1;
+unsigned int lineno = 1;
 unsigned int character = 1;
 %}
 %option noyywrap
-%option yylineno
 
 %%
 
-[\t ]           count();
+[\t ]           character++;
 
-";"[^\n]*$      count();
+";"[^\n]*$      character++;
 %{
     // Instructions
     // A-type
 %}
-ADD|add         { count(); return ADD;}
-ADC|adc         { count(); return ADC;}
-SUB|sub         { count(); return SUB;}
-SBC|sbc         { count(); return SBC;}
-MUL|mul         { count(); return MUL;}
-MLL|mll         { count(); return MLL;}
-SGN|sgn         { count(); return SGN;}
-RAS|ras         { count(); return RAS;}
-LSH|lsh         { count(); return LSH;}
-RSH|rsh         { count(); return RSH;}
-LRT|lrt         { count(); return LRT;}
-RRT|rrt         { count(); return RRT;}
-AND|and         { count(); return AND;}
-OR|or           { count(); return OR; }
-XOR|xor         { count(); return XOR;}
-NOT|not         { count(); return NOT;}
+ADD|add         { character++; return ADD;}
+ADC|adc         { character++; return ADC;}
+SUB|sub         { character++; return SUB;}
+SBC|sbc         { character++; return SBC;}
+MUL|mul         { character++; return MUL;}
+MLL|mll         { character++; return MLL;}
+SGN|sgn         { character++; return SGN;}
+RAS|ras         { character++; return RAS;}
+LSH|lsh         { character++; return LSH;}
+RSH|rsh         { character++; return RSH;}
+LRT|lrt         { character++; return LRT;}
+RRT|rrt         { character++; return RRT;}
+AND|and         { character++; return AND;}
+OR|or           { character++; return OR; }
+XOR|xor         { character++; return XOR;}
+NOT|not         { character++; return NOT;}
 %{
     // J-type
 %}
-JMP|jmp         { count(); return JMP;}
+JMP|jmp         { character++; return JMP;}
 %{
     // I-type
 %}
-ADDI|addi       { count(); return ADDI;}
-ADCI|adci       { count(); return ADCI;}
-SUBI|subi       { count(); return SUBI;}
-SBCI|sbci       { count(); return SBCI;}
-ANDI|andi       { count(); return ANDI;}
-ORI|ori         { count(); return ORI;}
-XORI|xori       { count(); return XORI;}
-LDI|ldi         { count(); return LDI;}
+ADDI|addi       { character++; return ADDI;}
+ADCI|adci       { character++; return ADCI;}
+SUBI|subi       { character++; return SUBI;}
+SBCI|sbci       { character++; return SBCI;}
+ANDI|andi       { character++; return ANDI;}
+ORI|ori         { character++; return ORI;}
+XORI|xori       { character++; return XORI;}
+LDI|ldi         { character++; return LDI;}
 %{
     // SI-type
 %}
-LSHI|lshi       { count(); return LSHI;}
-RSHI|rshi       { count(); return RSHI;}
-LRTI|lrti       { count(); return LRTI;}
-RRTI|rrti       { count(); return RRTI;}
+LSHI|lshi       { character++; return LSHI;}
+RSHI|rshi       { character++; return RSHI;}
+LRTI|lrti       { character++; return LRTI;}
+RRTI|rrti       { character++; return RRTI;}
 %{
     // F-type
 %}
-JFC|jfc         { count(); return JFC;}
-JFS|jfs         { count(); return JFS;}
+JFC|jfc         { character++; return JFC;}
+JFS|jfs         { character++; return JFS;}
 %{
     // LS-type
 %}
-LOAD|load       { count(); return LOAD;}
-SAVE|save       { count(); return SAVE;}
+LOAD|load       { character++; return LOAD;}
+SAVE|save       { character++; return SAVE;}
 %{
     // SP-type
 %}
-PUSH|push       { count(); return PUSH;}
-POP|pop         { count(); return POP;}
-SVPC|svpc       { count(); return SVPC;}
-RET|ret         { count(); return RET;}
+PUSH|push       { character++; return PUSH;}
+POP|pop         { character++; return POP;}
+SVPC|svpc       { character++; return SVPC;}
+RET|ret         { character++; return RET;}
 %{
     // Macros
 %}
-NOP|nop         { count(); return NOP;}
-MOV|mov         { count(); return MOV;}
-JVC|jvc         { count(); return JVC;}
-JVS|jvs         { count(); return JVS;}
-JNE|jne|JNZ|jnz { count(); return JNE;}
-JEQ|jeq|JEZ|jez { count(); return JEQ;}
-JGE|jge         { count(); return JGE;}
-JLT|jlt         { count(); return JLT;}
-JCC|jcc         { count(); return JCC;}
-JCS|jcs         { count(); return JCS;}
-CALL|call       { count(); return CALL;}
-HALT|halt       { count(); return HALT;}
-DW|dw           { count(); return DW;}
+NOP|nop         { character++; return NOP;}
+MOV|mov         { character++; return MOV;}
+JVC|jvc         { character++; return JVC;}
+JVS|jvs         { character++; return JVS;}
+JNE|jne|JNZ|jnz { character++; return JNE;}
+JEQ|jeq|JEZ|jez { character++; return JEQ;}
+JGE|jge         { character++; return JGE;}
+JLT|jlt         { character++; return JLT;}
+JCC|jcc         { character++; return JCC;}
+JCS|jcs         { character++; return JCS;}
+CALL|call       { character++; return CALL;}
+HALT|halt       { character++; return HALT;}
+DW|dw           { character++; return DW;}
 %{
     // Directives
 %}
-#DEFMACRO|#defmacro { count(); return DEFMACRO;}
-ENDDEF|enddef     { count(); return ENDDEF;}
-#INCLUDE|#include   { count(); return INCLUDE;}
+#DEFMACRO|#defmacro { character++; return DEFMACRO;}
+ENDDEF|enddef     { character++; return ENDDEF;}
+#INCLUDE|#include   { character++; return INCLUDE;}
 %{
     // Argument types
 %}
-R|r     { count(); return REG;}
-RM|rm   { count(); return REGMEM;}
-RMI|rmi { count(); return REGMEMIMM;}
-I|i     { count(); return IMM;}
+R|r     { character++; return REG;}
+RM|rm   { character++; return REGMEM;}
+RMI|rmi { character++; return REGMEMIMM;}
+I|i     { character++; return IMM;}
 %{
     // Register
 %}
-A|a   { count(); return A;}
-B|b   { count(); return B;}
-C|c   { count(); return C;}
-SP|sp { count(); return SP;}
+A|a   { character++; return A;}
+B|b   { character++; return B;}
+C|c   { character++; return C;}
+SP|sp { character++; return SP;}
 %{
     // High and low bytes
 %}
-".h"|".H" { count(); return HIGH;}
-".l"|".L" { count(); return LOW;}
+".h"|".H" { character++; return HIGH;}
+".l"|".L" { character++; return LOW;}
 
-\"(\\.|[^\\"])*\" { count(); yylval.text = strdup(yytext); return STRING;}
-'(\\.|.)' { count(); yylval.iVal = parseEscapeSeq(yytext); return CHAR;}
-[+-]?0*[1-9A-Fa-f][0-9a-fA-F]*h { count(); yylval.iVal = strtoul(yytext, NULL, 16) & 0xFFFFFFFF; return HEX;}
-[+-]?0*[0-1]+b { count(); yylval.iVal = strtoul(yytext, NULL, 2) & 0xFFFFFFFF; return BINARY;}
-[+-]?[1-9][0-9]* { count(); yylval.iVal = strtol(yytext, NULL, 10) & 0xFFFFFFFF; return DECIMAL;}
-[a-zA-Z_][a-zA-Z0-9_]* { count(); yylval.text = strdup(yytext); return IDENTIFIER;}
-[\[\]*,:=\n0$+()@] { count(); return yytext[0];}
+\"(\\.|[^\\"])*\" { character++; yylval.text = strdup(yytext); return STRING;}
+'(\\.|.)' { character++; yylval.iVal = parseEscapeSeq(yytext); return CHAR;}
+[+-]?0*[1-9A-Fa-f][0-9a-fA-F]*h { character++; yylval.iVal = strtoul(yytext, NULL, 16) & 0xFFFFFFFF; return HEX;}
+[+-]?0*[0-1]+b { character++; yylval.iVal = strtoul(yytext, NULL, 2) & 0xFFFFFFFF; return BINARY;}
+[+-]?[1-9][0-9]* { character++; yylval.iVal = strtol(yytext, NULL, 10) & 0xFFFFFFFF; return DECIMAL;}
+[a-zA-Z_][a-zA-Z0-9_]* { character++; yylval.text = strdup(yytext); return IDENTIFIER;}
+[\[\]*,:=0$+()@] { character++; return yytext[0];}
+"\n" { character = 1; lineno++; return '\n';}
 
 . {}
 
 %%
-
-void count() {
-    //if(!strcmp(yytext, "\n"))
-    //    line++;
-    //character += yyleng;
-}
 
 char parseEscapeSeq(char *str) {
     if (str[1] != '\\')

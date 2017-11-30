@@ -5,9 +5,10 @@
 #include "error.h"
 
 extern FILE* yyin;
-extern int yylineno;
+extern int lineno;
+extern int character;
 extern int yylex();
-extern int yyparse(InstructionList *list, UserMacroTable *userMacros);
+extern int yyparse(InstructionList *list, UserMacroTable *userMacros, char *filename);
 
 void replaceIncludes(InstructionList *list, UserMacroTable *userMacros);
 
@@ -18,11 +19,23 @@ void parseProgram(char *filename, InstructionList *list, UserMacroTable *userMac
         exit(1);
     }
     *userMacros = newRBT(UserMacroTable)(&cmpStr, &dstrUserMacroTableEntry);
-    yylineno = 1;
-    if (yyparse(list, userMacros))
+    lineno = 1;
+    character = 1;
+    if (yyparse(list, userMacros, filename))
         exit(1);
-    replaceIncludes(list, userMacros);
+    rewind(yyin);
+    int line = 1;
+    for (InstructionListNode *n = list->start; n; n = n->next) {
+        Instruction instr = n->data;
+        char *source = (char *) malloc(128 * sizeof(char));
+        while (instr.line >= line) {
+            fgets(source, 128, yyin);
+            line++;
+        }
+        n->data.source = source;
+    }
     fclose(yyin);
+    replaceIncludes(list, userMacros);
 }
 
 static UserMacroTable* newUserMacros;
