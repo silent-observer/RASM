@@ -73,6 +73,7 @@ DString synthesize(InstructionList list) {
             daAppendN(DString)(&result, lastFilename, strlen(lastFilename));
             daAppendN(DString)(&result, "\"\n", 2);
         }
+        int startSize = result.size;
         sprintf(buffer, "%03lx: ", instr.address);
         daAppendN(DString)(&result, buffer, strlen(buffer));
         unsigned short val;
@@ -203,8 +204,12 @@ DString synthesize(InstructionList list) {
                 daAppendN(DString)(&result, buffer, strlen(buffer));
             }
         }
-        daAppendN(DString)(&result, "; -- ", 5);
-        sprintf(buffer, "%d: ", instr.line);
+        daAppendN(DString)(&result, ";", 1);
+        if (result.size - startSize < 30) {
+            daAppendN(DString)(&result, "                              ", 30 - (result.size - startSize));
+        }
+        daAppendN(DString)(&result, " -- ", 4);
+        sprintf(buffer, "%3d: ", instr.line);
         daAppendN(DString)(&result, buffer, strlen(buffer));
         daAppendN(DString)(&result, instr.source, strlen(instr.source));
     }
