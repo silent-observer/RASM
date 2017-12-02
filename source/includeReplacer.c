@@ -8,7 +8,7 @@ extern FILE* yyin;
 extern int lineno;
 extern int character;
 extern int yylex();
-extern int yyparse(InstructionList *list, UserMacroTable *userMacros, char *filename);
+extern int yyparse(InstructionList *list, UserMacroTable *userMacros);
 
 void replaceIncludes(InstructionList *list, UserMacroTable *userMacros);
 
@@ -21,10 +21,11 @@ void parseProgram(char *filename, InstructionList *list, UserMacroTable *userMac
     *userMacros = newRBT(UserMacroTable)(&cmpStr, &dstrUserMacroTableEntry);
     lineno = 1;
     character = 1;
-    if (yyparse(list, userMacros, filename))
+    if (yyparse(list, userMacros))
         exit(1);
     rewind(yyin);
     int line = 1;
+    char *filenameNew = strdup(filename);
     for (InstructionListNode *n = list->start; n; n = n->next) {
         Instruction instr = n->data;
         char *source = (char *) malloc(128 * sizeof(char));
@@ -33,6 +34,7 @@ void parseProgram(char *filename, InstructionList *list, UserMacroTable *userMac
             line++;
         }
         n->data.source = source;
+        n->data.filename = filenameNew;
     }
     fclose(yyin);
     replaceIncludes(list, userMacros);

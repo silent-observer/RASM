@@ -80,7 +80,6 @@ program : instruction_list {*result = $1;}
 
 instruction_list : instruction_list {memset(&i, 0, sizeof i);} instruction
                     {
-                        $3.filename = filename;
                         $3.line = lineno-1;
                         printf("%d!\n", $3.line);
                         llAppend(InstructionList)(&$1, $3);
@@ -88,7 +87,6 @@ instruction_list : instruction_list {memset(&i, 0, sizeof i);} instruction
                     }
                 | instruction_list {memset(&i, 0, sizeof i);} label
                     {
-                        $3.filename = filename;
                         $3.line = lineno-1;
                         $3.isMacro = true; 
                         llAppend(InstructionList)(&$1, $3);
@@ -99,7 +97,6 @@ instruction_list : instruction_list {memset(&i, 0, sizeof i);} instruction
                 | instruction_list macro_definition
                 | instruction_list {memset(&i, 0, sizeof i);} include_directive 
                     {
-                        $3.filename = filename;
                         $3.line = lineno-1;
                         llAppend(InstructionList)(&$1, $3);
                         $$ = $1;
