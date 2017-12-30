@@ -22,7 +22,7 @@ static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels)
     LabelTableEntry entry = rbtGet(LabelTable)(labels, arg.text);
     test(!entry, "Unknown identifier %s!\n", arg.text);
     free(arg.text);
-    if (instr.iType == I_JFC || instr.iType == I_JFS)
+    if (instr.iType == I_JFC || instr.iType == I_JFS || instr.iType == I_JMP)
         arg.iVal = entry->value - (instr.address+1);
     else
         arg.iVal = entry->value;
@@ -88,12 +88,13 @@ static void replaceMacro(InstructionList *list, InstructionListNode *n) {
         daAppend(ArgumentDArray)(&instr.args, &n->data.args.data[0]);
         instr.address = n->data.address + 1;
         n->data.iType = I_SVPC;
-        n->data.args.size = 0;
+        n->data.args.data[0].type = A_CONSTANT;
+        n->data.args.data[0].iVal = 1;
         llInsertAfter(InstructionList)(list, n, instr);
     } else if (n->data.mType == M_HALT) {
         n->data.iType = I_JMP;
         n->data.args.data[0].type = A_CONSTANT;
-        n->data.args.data[0].iVal = n->data.address;
+        n->data.args.data[0].iVal = -1;
     } else if (n->data.mType == M_DW) {
         n->data.isMacro = true;
     }

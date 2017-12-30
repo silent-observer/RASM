@@ -42,6 +42,8 @@ static unsigned int getInstrSize(Instruction instr) {
                 break;
             case I_JMP: // J-type
                 break;
+            case I_JMR: // JR-type
+                size += getArgSize(instr.args.data[0]);
             case I_ADDI: case I_ADCI: case I_SUBI: case I_SBCI: // I-type
             case I_ANDI: case I_ORI:  case I_XORI:
                 size += getArgSize(instr.args.data[0]);

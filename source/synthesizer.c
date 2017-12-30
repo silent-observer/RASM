@@ -132,8 +132,11 @@ DString synthesize(InstructionList list) {
             val |= (I_NOT - I_ADD) << 5;
             val |= synthArg(false, instr.args.data[1]);
         } else if (instr.iType == I_JMP) {
-            val = 0x8000 | (instr.args.data[0].iVal & 0x7FFF);
+            val = 0xC000 | (instr.args.data[0].iVal & 0x1FFF);
             synth[0] = false;
+        } else if (instr.iType == I_JMR) {
+            val = 0x8000;
+            val |= synthArg(false, instr.args.data[0]) << 9;
         } else if (instr.iType >= I_ADDI && instr.iType <= I_XORI) {
             if (instr.args.data[0].type != instr.args.data[2].type) {
                 printf("Cannot use source and destination of different types in I-type instruction!\n");
@@ -185,7 +188,12 @@ DString synthesize(InstructionList list) {
             val = 0x3000;
             val |= synthArg(false, instr.args.data[0]) << 9;
             val |= (instr.iType - I_PUSH) << 7;
-        } else if (instr.iType == I_SVPC || instr.iType == I_RET) {
+        } else if (instr.iType == I_SVPC) {
+            val = 0x3000;
+            val |= (instr.iType - I_PUSH) << 7;
+            val |= instr.args.data[0].iVal & 0x007F;
+            synth[0] = false;
+        } else if (instr.iType == I_RET) {
             val = 0x3000;
             val |= (instr.iType - I_PUSH) << 7;
         }

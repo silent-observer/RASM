@@ -113,6 +113,7 @@ void printInstr(Instruction instr, bool isReplaced) {
             case I_XOR: printf("XOR"); break;
             case I_NOT: printf("NOT"); break;
             case I_JMP: printf("JMP"); break;
+            case I_JMR: printf("JMR"); break;
             case I_ADDI: printf("ADDI"); break;
             case I_ADCI: printf("ADCI"); break;
             case I_SUBI: printf("SUBI"); break;

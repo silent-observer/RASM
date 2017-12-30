@@ -41,6 +41,10 @@ NOT|not         { character++; return NOT;}
 %}
 JMP|jmp         { character++; return JMP;}
 %{
+    // JR-type
+%}
+JMR|jmr         { character++; return JMR;}
+%{
     // I-type
 %}
 ADDI|addi       { character++; return ADDI;}

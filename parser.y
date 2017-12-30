@@ -34,6 +34,7 @@
 %token LSH RSH LRT RRT
 %token AND OR  XOR NOT
 %token JMP
+%token JMR
 %token ADDI ADCI SUBI SBCI
 %token ANDI ORI XORI LDI
 %token LSHI RSHI LRTI RRTI
@@ -193,6 +194,13 @@ simple_instr    : a_type reg_mem_imm ',' reg ',' dest
                         daAppend(ArgumentDArray)(&i.args, &$2);
                         $$ = i;
                     }
+                | JMR dest
+                    {
+                        i.iType = I_JMR;
+                        i.args = newDArray(ArgumentDArray)(1);
+                        daAppend(ArgumentDArray)(&i.args, &$2);
+                        $$ = i;
+                    }
                 | i_type dest_sp ',' imm ',' dest_sp
                     {
                         i.iType = $1;
@@ -257,10 +265,11 @@ simple_instr    : a_type reg_mem_imm ',' reg ',' dest
                         daAppend(ArgumentDArray)(&i.args, &$2);
                         $$ = i;
                     }
-                | SVPC 
+                | SVPC imm
                     {
                         i.iType = I_SVPC; 
-                        i.args = newDArray(ArgumentDArray)(0); 
+                        i.args = newDArray(ArgumentDArray)(1); 
+                        daAppend(ArgumentDArray)(&i.args, &$2);
                         $$ = i;
                     }
                 | RET  

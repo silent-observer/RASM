@@ -14,6 +14,8 @@ enum instrType {
     I_AND, I_OR,  I_XOR, I_NOT,
     // J-type
     I_JMP,
+    // JR-type
+    I_JMR,
     // I-type
     I_ADDI, I_ADCI, I_SUBI, I_SBCI,
     I_ANDI, I_ORI,  I_XORI, I_LDI,
