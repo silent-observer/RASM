@@ -15,8 +15,13 @@ OBJFILES = 	objfiles/addresser.o \
 			objfiles/userMacroReplacer.o \
 			objfiles/includeReplacer.o
 
+win: rasm.exe
+linux: rasm
 
 rasm.exe: $(OBJFILES)
+	$(CC) -o $@ $^ $(CFLAGS)
+
+rasm: $(OBJFILES)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 objfiles/%.o: source/%.c include/ast.h $(DATA_STR_INCLUDE)
@@ -34,5 +39,5 @@ source/parser.tab.c include/y.tab.h: parser.y
 	bison -t -osource/parser.tab.c --defines=include/y.tab.h parser.y
 
 .PHONY: clean
-clean : 
+clean :
 	rm -f objfiles/*.o
