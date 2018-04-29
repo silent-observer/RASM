@@ -12,6 +12,8 @@ enum instrType {
     I_MUL, I_MLL, I_SGN, I_RAS,
     I_LSH, I_RSH, I_LRT, I_RRT,
     I_AND, I_OR,  I_XOR, I_NOT,
+    // M8-type
+    I_MOV8LL, I_MOV8LH, I_MOV8HL, I_MOV8HH, 
     // J-type
     I_JMP,
     // JR-type
@@ -22,7 +24,7 @@ enum instrType {
     // SI-type
     I_LSHI, I_RSHI, I_LRTI, I_RRTI,
     // F-type
-    I_JFC, I_JFS, 
+    I_JFC, I_JFS,
     // LS-type
     I_LOAD, I_SAVE,
     // SP-type
@@ -42,7 +44,7 @@ enum argType {
     A_ID_LOW,
     A_MACRO_ARG,
     A_SUM,
-    A_INDEX, 
+    A_INDEX,
     A_SUM_HIGH,
     A_SUM_LOW,
     A_FASTMEM

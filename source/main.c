@@ -29,10 +29,10 @@ void printArg(Argument a, bool isReplaced) {
             } break;
         case A_CONSTANT: printf(a.iVal < 1000? "%ld" : "%08lXh", a.iVal); break;
         case A_ADDRESSED: printf("*A"); break;
-        case A_ABSOLUTE:    if (!isReplaced) 
+        case A_ABSOLUTE:    if (!isReplaced)
                                 printf("*%s", a.text);
-                            else 
-                                printf("*%08lXh", a.iVal); 
+                            else
+                                printf("*%08lXh", a.iVal);
                             break;
         case A_STACK: printf("[%ld]", a.iVal); break;
         case A_ZERO: printf("0"); break;
@@ -43,11 +43,11 @@ void printArg(Argument a, bool isReplaced) {
         case A_MACRO_ARG: printf("$%ld", a.iVal); break;
         case A_SUM_HIGH:
         case A_SUM_LOW: printf("(");
-        case A_SUM: { 
+        case A_SUM: {
             for (int i = 0; i < a.sum->size; i++) {
                 if (i != 0) printf("+");
                 printArg(a.sum->data[i], isReplaced);
-            } 
+            }
             if (a.type == A_SUM_HIGH) printf(").h");
             else if (a.type == A_SUM_LOW) printf(").l");
             break;
@@ -57,8 +57,8 @@ void printArg(Argument a, bool isReplaced) {
             for (int i = 0; i < a.sum->size-1; i++) {
                 if (i != 0) printf("+");
                 printArg(a.sum->data[i], isReplaced);
-            } 
-            printf("]"); 
+            }
+            printf("]");
             break;
         }
         case A_FASTMEM: printf("@%ld", a.iVal); break;
@@ -112,6 +112,10 @@ void printInstr(Instruction instr, bool isReplaced) {
             case I_OR: printf("OR"); break;
             case I_XOR: printf("XOR"); break;
             case I_NOT: printf("NOT"); break;
+            case I_MOV8LL: printf("MOV8LL"); break;
+            case I_MOV8LH: printf("MOV8LH"); break;
+            case I_MOV8HL: printf("MOV8HL"); break;
+            case I_MOV8HH: printf("MOV8HH"); break;
             case I_JMP: printf("JMP"); break;
             case I_JMR: printf("JMR"); break;
             case I_ADDI: printf("ADDI"); break;
@@ -194,7 +198,7 @@ int main(int argc, char *argv[]) {
     printf("    REPLACED MACROS AND LABELS:\n");
     for (InstructionListNode *n = list.start; n; n = n->next)
         printInstr(n->data, true);
-    
+
     DString str = synthesize(list);
     FILE *out = fopen(argv[2], "w");
     fprintf(out, "%s\n", str.data);

@@ -30,8 +30,8 @@ static Argument replaceLabel(Instruction instr, Argument arg, LabelTable labels)
         arg.iVal = (arg.iVal & 0xFFFF0000) >> 16;
     else if (arg.type == A_ID_LOW)
         arg.iVal &= 0xFFFF;
-    if (arg.type == A_IDENTIFIER || 
-        arg.type == A_ID_HIGH || 
+    if (arg.type == A_IDENTIFIER ||
+        arg.type == A_ID_HIGH ||
         arg.type == A_ID_LOW)
         arg.type = A_CONSTANT;
     if (arg.iVal == 0)
@@ -86,7 +86,7 @@ static void replaceMacro(InstructionList *list, InstructionListNode *n) {
         instr.iType = I_JMP;
         instr.args = newDArray(ArgumentDArray)(1);
         daAppend(ArgumentDArray)(&instr.args, &n->data.args.data[0]);
-        instr.address = n->data.address + 1;
+        instr.address = n->data.address + 2;
         n->data.iType = I_SVPC;
         n->data.args.data[0].type = A_CONSTANT;
         n->data.args.data[0].iVal = 1;

@@ -13,20 +13,20 @@ static unsigned int getArgSize(Argument arg) {
         case A_SUM:
         case A_SUM_HIGH:
         case A_SUM_LOW:
-        case A_CONSTANT: return 1;
+        case A_CONSTANT: return 2;
         case A_INDEX:
-        case A_ABSOLUTE: return 2;
-        case A_IDENTIFIER: printf("Cannot use identifier '%s' as argument, use '%s.h' or '%s.l' instead.\n", 
+        case A_ABSOLUTE: return 4;
+        case A_IDENTIFIER: printf("Cannot use identifier '%s' as argument, use '%s.h' or '%s.l' instead.\n",
             arg.text, arg.text, arg.text); exit(1);
         case A_STRING: printf("Cannot use string %s in not DW instruction.\n", arg.text); exit(1);
         case A_MACRO_ARG: printf("Cannot use macro parameters outside of macro definition!.\n"); exit(1);
     }
-    printf("I don't understand how control can reach here.\nNevermind.\n"); 
+    printf("I don't understand how control can reach here.\nNevermind.\n");
     exit(2);
 }
 
 static unsigned int getInstrSize(Instruction instr) {
-    unsigned int size = 1;
+    unsigned int size = 2;
     if (!instr.isMacro)
         switch(instr.iType) {
             case I_ADD: case I_ADC: case I_SUB: case I_SBC: // A-type
@@ -35,6 +35,10 @@ static unsigned int getInstrSize(Instruction instr) {
             case I_AND: case I_OR:  case I_XOR:
                 size += getArgSize(instr.args.data[0]);
                 size += getArgSize(instr.args.data[2]);
+                break;
+            case I_MOV8LL: case I_MOV8LH: case I_MOV8HL: case I_MOV8HH:
+                size += getArgSize(instr.args.data[0]);
+                size += getArgSize(instr.args.data[1]);
                 break;
             case I_NOT:
                 size += getArgSize(instr.args.data[0]);
@@ -82,11 +86,11 @@ static unsigned int getInstrSize(Instruction instr) {
             case M_JGE: case M_JLT: case M_JCC: case M_JCS:
                 break;
             case M_CALL:
-                size++;
+                size += 2;
                 break;
             case M_HALT:
                 break;
-            case M_DW: 
+            case M_DW:
             {
                 if (instr.args.data[0].type != A_STRING)
                     break;
@@ -102,11 +106,12 @@ static unsigned int getInstrSize(Instruction instr) {
                                 c++;
                             size++;
                         }
-                    } else { 
+                    } else {
                         size++; c++;
                     }
                 }
                 size -= 2;
+                if (size % 2 == 1) size--;
                 break;
             }
             case M_LABEL: case M_LABEL_ASSIGN:
@@ -123,7 +128,7 @@ LabelTable addAddresses(InstructionList *list) {
     for (InstructionListNode *n = list->start; n;) {
         n->data.address = currAddr;
         currAddr += getInstrSize(n->data);
-        if (n->data.isMacro && (n->data.mType == M_LABEL || 
+        if (n->data.isMacro && (n->data.mType == M_LABEL ||
                                 n->data.mType == M_LABEL_ASSIGN)) {
             if (n->data.mType == M_LABEL)
                 rbtSet(LabelTable)(&labels, strdup(n->data.args.data[0].text), currAddr);
@@ -133,8 +138,8 @@ LabelTable addAddresses(InstructionList *list) {
                 n = n->next;
                 llRemove(InstructionList)(list, n->prev);
             }
-            else { 
-                llRemove(InstructionList)(list, n); 
+            else {
+                llRemove(InstructionList)(list, n);
                 break;
             }
         } else n = n->next;

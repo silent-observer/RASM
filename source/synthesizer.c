@@ -74,7 +74,7 @@ DString synthesize(InstructionList list) {
             daAppendN(DString)(&result, "\"\n", 2);
         }
         int startSize = result.size;
-        sprintf(buffer, "%03lx: ", instr.address);
+        sprintf(buffer, "%03lx: ", instr.address/2);
         daAppendN(DString)(&result, buffer, strlen(buffer));
         unsigned short val;
         bool synth[3] = {true, true, true};
@@ -82,20 +82,25 @@ DString synthesize(InstructionList list) {
             if (instr.args.data[0].type == A_CONSTANT || instr.args.data[0].type == A_ZERO)
                 val = instr.args.data[0].iVal;
             else {
-                for (char *c = instr.args.data[0].text+1; *c && *c != '\"'; c++)
+                bool secondC = false;
+                val = 0;
+                for (char *c = instr.args.data[0].text+1; *c && *c != '\"'; c++) {
                     if (*c != '\\') {
-                        sprintf(buffer, "%04x ", *c);
-                        daAppendN(DString)(&result, buffer, strlen(buffer));
+                        if (!secondC)
+                            val = *c;
+                        else
+                            val |= *c << 8;
                     } else {
+                        unsigned char escape = 0;
                         switch (*++c) {
-                            case '\\': sprintf(buffer, "%04x ", '\\'); break;
-                            case '\"': sprintf(buffer, "%04x ", '\"'); break;
-                            case 'a': sprintf(buffer, "%04x ", '\a'); break;
-                            case 'b': sprintf(buffer, "%04x ", '\b'); break;
-                            case 'n': sprintf(buffer, "%04x ", '\n'); break;
-                            case 't': sprintf(buffer, "%04x ", '\t'); break;
-                            case 'v': sprintf(buffer, "%04x ", '\v'); break;
-                            case '0': sprintf(buffer, "%04x ", '\0'); break;
+                            case '\\': escape = '\\'; break;
+                            case '\"': escape = '\"'; break;
+                            case 'a': escape = '\a'; break;
+                            case 'b': escape = '\b'; break;
+                            case 'n': escape = '\n'; break;
+                            case 't': escape = '\t'; break;
+                            case 'v': escape = '\v'; break;
+                            case '0': escape = '\0'; break;
                             case 'x': {
                                 unsigned int value = 0;
                                 c++;
@@ -110,15 +115,26 @@ DString synthesize(InstructionList list) {
                                     else if (*c >= 'A' && *c <= 'F')
                                         value += *c++ - 'A' + 10;
                                 }
-                                sprintf(buffer, "%04x ", value & 0xFF);
+                                escape = value & 0xFF;
                                 c--;
                                 break;
                             }
                             default: break;
                         }
+                        if (!secondC)
+                            val = escape;
+                        else
+                            val |= escape << 8;
+
+                    }
+                    if (secondC) {
+                        sprintf(buffer, "%04x ", val);
                         daAppendN(DString)(&result, buffer, strlen(buffer));
                     }
-                val = '\0';
+                    secondC = !secondC;
+                }
+                if (!secondC)
+                    val = '\0';
             }
         } else if (instr.iType >= I_ADD && instr.iType <= I_XOR) {
             val = 0x0000;
@@ -131,11 +147,17 @@ DString synthesize(InstructionList list) {
             val |= synthArg(false, instr.args.data[0]) << 9;
             val |= (I_NOT - I_ADD) << 5;
             val |= synthArg(false, instr.args.data[1]);
+        } else if (instr.iType >= I_MOV8LL && instr.iType <= I_MOV8HH) {
+            val = 0x8000;
+            val |= synthArg(false, instr.args.data[0]) << 9;
+            val |= ((instr.iType - I_MOV8LL) / 2) << 8;
+            val |= synthArg(false, instr.args.data[1]) << 5;
+            val |= ((instr.iType - I_MOV8LL) % 2) << 4;
         } else if (instr.iType == I_JMP) {
-            val = 0xC000 | (instr.args.data[0].iVal & 0x1FFF);
+            val = 0xC000 | ((instr.args.data[0].iVal >> 1) & 0x1FFF);
             synth[0] = false;
         } else if (instr.iType == I_JMR) {
-            val = 0x8000;
+            val = 0x9000;
             val |= synthArg(false, instr.args.data[0]) << 9;
         } else if (instr.iType >= I_ADDI && instr.iType <= I_XORI) {
             if (instr.args.data[0].type != instr.args.data[2].type) {
@@ -165,13 +187,13 @@ DString synthesize(InstructionList list) {
         } else if (instr.iType == I_JFC) {
             val = 0x2000;
             val |= (instr.args.data[1].iVal & 0x0003) << 9;
-            val |= instr.args.data[0].iVal & 0x00FF;
+            val |= (instr.args.data[0].iVal >> 1) & 0x00FF;
             synth[0] = false;
             synth[1] = false;
         } else if (instr.iType == I_JFS) {
             val = 0x2800;
             val |= (instr.args.data[1].iVal & 0x0003) << 9;
-            val |= instr.args.data[0].iVal & 0x00FF;
+            val |= (instr.args.data[0].iVal >> 1) & 0x00FF;
             synth[0] = false;
             synth[1] = false;
         } else if (instr.iType == I_LOAD) {

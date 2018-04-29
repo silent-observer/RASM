@@ -37,6 +37,10 @@ OR|or           { character++; return OR; }
 XOR|xor         { character++; return XOR;}
 NOT|not         { character++; return NOT;}
 %{
+    // M8-type
+%}
+MOV8|mov8       { character++; return MOV8;}
+%{
     // J-type
 %}
 JMP|jmp         { character++; return JMP;}
@@ -116,10 +120,15 @@ B|b   { character++; return B;}
 C|c   { character++; return C;}
 SP|sp { character++; return SP;}
 %{
-    // High and low bytes
+    // High and low words
 %}
 ".h"|".H" { character++; return HIGH;}
 ".l"|".L" { character++; return LOW;}
+%{
+    // High and low bytes
+%}
+"/h"|"/H" { character++; return HIGHB;}
+"/l"|"/L" { character++; return LOWB;}
 
 \"(\\.|[^\\"])*\" { character++; yylval.text = strdup(yytext); return STRING;}
 '(\\.|.)' { character++; yylval.iVal = parseEscapeSeq(yytext); return CHAR;}

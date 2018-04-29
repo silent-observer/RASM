@@ -1,21 +1,19 @@
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
-/* A Bison parser, made by GNU Bison 2.4.1.  */
+/* Bison interface for Yacc-like parsers in C
 
-/* Skeleton interface for Bison's Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
-   
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -28,98 +26,107 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-
-/* Tokens.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     ADD = 258,
-     ADC = 259,
-     SUB = 260,
-     SBC = 261,
-     MUL = 262,
-     MLL = 263,
-     SGN = 264,
-     RAS = 265,
-     LSH = 266,
-     RSH = 267,
-     LRT = 268,
-     RRT = 269,
-     AND = 270,
-     OR = 271,
-     XOR = 272,
-     NOT = 273,
-     JMP = 274,
-     JMR = 275,
-     ADDI = 276,
-     ADCI = 277,
-     SUBI = 278,
-     SBCI = 279,
-     ANDI = 280,
-     ORI = 281,
-     XORI = 282,
-     LDI = 283,
-     LSHI = 284,
-     RSHI = 285,
-     LRTI = 286,
-     RRTI = 287,
-     JFC = 288,
-     JFS = 289,
-     LOAD = 290,
-     SAVE = 291,
-     PUSH = 292,
-     POP = 293,
-     SVPC = 294,
-     RET = 295,
-     NOP = 296,
-     MOV = 297,
-     JVC = 298,
-     JVS = 299,
-     JNE = 300,
-     JEQ = 301,
-     JGE = 302,
-     JLT = 303,
-     JCC = 304,
-     JCS = 305,
-     CALL = 306,
-     HALT = 307,
-     DW = 308,
-     DEFMACRO = 309,
-     ENDDEF = 310,
-     INCLUDE = 311,
-     REG = 312,
-     REGMEM = 313,
-     REGMEMIMM = 314,
-     IMM = 315,
-     A = 316,
-     B = 317,
-     C = 318,
-     SP = 319,
-     HIGH = 320,
-     LOW = 321,
-     IDENTIFIER = 322,
-     STRING = 323,
-     HEX = 324,
-     BINARY = 325,
-     DECIMAL = 326,
-     CHAR = 327
-   };
+#ifndef YY_YY_INCLUDE_Y_TAB_H_INCLUDED
+# define YY_YY_INCLUDE_Y_TAB_H_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 1
+#endif
+#if YYDEBUG
+extern int yydebug;
 #endif
 
+/* Token type.  */
+#ifndef YYTOKENTYPE
+# define YYTOKENTYPE
+  enum yytokentype
+  {
+    ADD = 258,
+    ADC = 259,
+    SUB = 260,
+    SBC = 261,
+    MUL = 262,
+    MLL = 263,
+    SGN = 264,
+    RAS = 265,
+    LSH = 266,
+    RSH = 267,
+    LRT = 268,
+    RRT = 269,
+    AND = 270,
+    OR = 271,
+    XOR = 272,
+    NOT = 273,
+    MOV8 = 274,
+    JMP = 275,
+    JMR = 276,
+    ADDI = 277,
+    ADCI = 278,
+    SUBI = 279,
+    SBCI = 280,
+    ANDI = 281,
+    ORI = 282,
+    XORI = 283,
+    LDI = 284,
+    LSHI = 285,
+    RSHI = 286,
+    LRTI = 287,
+    RRTI = 288,
+    JFC = 289,
+    JFS = 290,
+    LOAD = 291,
+    SAVE = 292,
+    PUSH = 293,
+    POP = 294,
+    SVPC = 295,
+    RET = 296,
+    NOP = 297,
+    MOV = 298,
+    JVC = 299,
+    JVS = 300,
+    JNE = 301,
+    JEQ = 302,
+    JGE = 303,
+    JLT = 304,
+    JCC = 305,
+    JCS = 306,
+    CALL = 307,
+    HALT = 308,
+    DW = 309,
+    DEFMACRO = 310,
+    ENDDEF = 311,
+    INCLUDE = 312,
+    REG = 313,
+    REGMEM = 314,
+    REGMEMIMM = 315,
+    IMM = 316,
+    A = 317,
+    B = 318,
+    C = 319,
+    SP = 320,
+    HIGH = 321,
+    LOW = 322,
+    HIGHB = 323,
+    LOWB = 324,
+    IDENTIFIER = 325,
+    STRING = 326,
+    HEX = 327,
+    BINARY = 328,
+    DECIMAL = 329,
+    CHAR = 330
+  };
+#endif
 
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-{
 
-/* Line 1676 of yacc.c  */
-#line 20 "parser.y"
+union YYSTYPE
+{
+#line 20 "parser.y" /* yacc.c:1909  */
 
     InstructionList iList;
     Instruction instr;
@@ -131,30 +138,31 @@ typedef union YYSTYPE
     char *text;
     long int iVal;
 
+#line 142 "include/y.tab.h" /* yacc.c:1909  */
+};
 
-
-/* Line 1676 of yacc.c  */
-#line 138 "include/y.tab.h"
-} YYSTYPE;
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
-extern YYSTYPE yylval;
-
+/* Location type.  */
 #if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
-typedef struct YYLTYPE
+typedef struct YYLTYPE YYLTYPE;
+struct YYLTYPE
 {
   int first_line;
   int first_column;
   int last_line;
   int last_column;
-} YYLTYPE;
-# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+};
 # define YYLTYPE_IS_DECLARED 1
 # define YYLTYPE_IS_TRIVIAL 1
 #endif
 
-extern YYLTYPE yylloc;
 
+extern YYSTYPE yylval;
+extern YYLTYPE yylloc;
+int yyparse (InstructionList *result, UserMacroTable *userMacros, char *filename);
+
+#endif /* !YY_YY_INCLUDE_Y_TAB_H_INCLUDED  */
